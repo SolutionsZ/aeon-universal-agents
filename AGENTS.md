@@ -1,5 +1,5 @@
 # AEON UNIVERSAL AGENTS.md
-Version: 8.0
+Version: 8.1
 Scope: universal, stack-neutral, core-code-first, objective, anti-hallucination.
 Purpose: guide any coding agent to inspect existing repo truth first, understand, structure, build, patch, document, test, and review software with minimal safe code, clean MVC separation, professional mobile-first frontend practices, and design discipline.
 
@@ -76,6 +76,14 @@ Hard rules:
 - Do not fabricate citations, logs, benchmark numbers, security status, or compatibility claims.
 - If information is missing, say exactly what is missing and continue only with safe assumptions.
 
+Proof before claims:
+- Before claiming a file exists: read it or list the directory.
+- Before claiming a command works: run it or cite where it is documented.
+- Before claiming a function exists: grep for it or read the source.
+- Before claiming tests pass: run the test command and show output.
+- Before claiming a fix works: verify the change with a run, test, or stated manual check.
+- Cite path + line, command + output, or doc + section when asserting facts about the codebase.
+
 Use this format when needed:
 
 ```txt
@@ -114,6 +122,19 @@ If the task is clear, proceed.
 If details are missing but a safe default exists, state the assumption and proceed.
 Ask a question only when continuing would be unsafe or likely wrong.
 
+## Stop gates
+
+Stop and confirm with the user before:
+- deleting files, directories, or large blocks of code
+- changing authentication, permissions, or security policy
+- altering database schema or running destructive migrations
+- changing public API response shapes or breaking contracts
+- adding new dependencies
+- refactoring or restructuring code the user did not ask to change
+- replacing working patterns with "modern" alternatives
+- any change that is irreversible without a backup or rollback plan
+
+If in doubt, describe the intended change and wait for approval.
 
 ---
 
@@ -194,7 +215,6 @@ Owner:
 Why:
 ```
 
-
 ---
 
 # 3A. MVC / STRUCTURE LAW
@@ -204,8 +224,11 @@ Logical structure matters in every project.
 Use MVC as a universal thinking model, not as a forced framework.
 
 ```txt
+DOMAIN
+Real-world rules, business meaning, invariants. The "why."
+
 MODEL
-Data, state, entities, schemas, persistence, domain rules.
+Data, state, entities, schemas, persistence.
 
 VIEW
 UI, rendered output, documents, reports, CLI/API response formatting.
@@ -224,6 +247,9 @@ Mapping between formats, vendors, protocols, APIs, databases.
 
 WORKER
 Background jobs, scheduled tasks, queue consumers, heavy async work.
+
+INFRA
+Runtime, deployment, networking, CI/CD, observability.
 ```
 
 Rules:
@@ -490,6 +516,20 @@ Patch rules:
 - avoid new dependencies unless justified
 - do not swallow errors
 - do not hide uncertainty
+- do not rename, restructure, or "modernize" code the user did not ask to change
+- do not replace working patterns with newer alternatives without explicit request
+- working ugly code beats broken pretty code
+
+## Version control discipline
+
+When working in a git repository:
+- write clear, descriptive commit messages — what changed and why
+- keep commits small and focused — one concern per commit
+- never commit .env, secrets, API keys, tokens, credentials, or node_modules
+- never force-push to main/master without explicit user approval
+- never rewrite shared branch history
+- check git status before committing to avoid unintended files
+- if a .gitignore is missing essential entries, add them
 
 ---
 
@@ -594,14 +634,22 @@ Abuse case:
 ```
 
 Rules:
-- validate server-side
-- authorize at the resource boundary
-- never trust client-provided ownership
+- validate server-side — never rely on client validation alone
+- authorize at the resource boundary — check ownership on every write
+- never trust client-provided ownership, IDs, or role claims
 - keep public read and private write paths separate
-- sanitize rendered output
-- protect secrets
-- avoid logging secrets or sensitive payloads
-- fail closed for security-sensitive paths
+- sanitize rendered output — prevent XSS in templates and API responses
+- protect secrets — never commit .env, API keys, tokens, or credentials
+- use environment variables for all secrets and configuration that varies per environment
+- avoid logging secrets, tokens, passwords, or sensitive payloads
+- fail closed for security-sensitive paths — deny by default, allow explicitly
+- set CORS to explicit origins — never use wildcard in production
+- protect forms against CSRF when using cookie-based sessions
+- validate and limit file uploads: type, size, filename
+- rate-limit authentication endpoints and public APIs
+- hash passwords with bcrypt or argon2 — never store plain text
+- use HTTPS in production — redirect HTTP to HTTPS
+- set security headers: Content-Security-Policy, X-Content-Type-Options, X-Frame-Options
 
 ---
 
@@ -737,7 +785,7 @@ Rules:
 
 ---
 
-# 15A. FRONTEND AND DESIGN LAW
+# 15. FRONTEND AND DESIGN LAW
 
 Any frontend work must be clean, professional, mobile-friendly, optimized, user-friendly, and well designed.
 
@@ -862,7 +910,7 @@ Risk:
 
 ---
 
-# 15. API / INTERFACE LAW
+# 16. API / INTERFACE LAW
 
 Every endpoint, CLI command, library function, or UI action has a contract.
 
@@ -887,7 +935,7 @@ Rules:
 
 ---
 
-# 16. TEST / VERIFICATION LAW
+# 17. TEST / VERIFICATION LAW
 
 Always define verification.
 
@@ -915,7 +963,7 @@ Before final:
 
 ---
 
-# 17. OBJECTIVE REVIEW LAW
+# 18. OBJECTIVE REVIEW LAW
 
 Review code like a production incident will happen.
 
@@ -945,7 +993,7 @@ Do not nitpick style unless it affects maintainability or project conventions.
 
 ---
 
-# 18. CONTEXT COMPRESSION LAW
+# 19. CONTEXT COMPRESSION LAW
 
 Conversation is raw event log.
 Memory is extracted operational state.
@@ -981,10 +1029,9 @@ Risk:
 Remove fluff.
 Preserve exact names, errors, commands, files, schemas, payloads, decisions, and failed attempts.
 
-
 ---
 
-# 19A. DOCUMENTATION MAINTENANCE LAW
+# 20. DOCUMENTATION MAINTENANCE LAW
 
 Documentation is part of the project, not an afterthought.
 
@@ -1055,7 +1102,7 @@ Reason:
 
 ---
 
-# 19. AGENT INSTRUCTION FILE RULES
+# 21. AGENT INSTRUCTION FILE RULES
 
 This file is a universal base.
 Project-specific instructions should override it.
@@ -1093,7 +1140,7 @@ Reference deeper docs when needed.
 
 ---
 
-# 20. OUTPUT CONTRACTS
+# 22. OUTPUT CONTRACTS
 
 ## Bug
 
@@ -1204,11 +1251,11 @@ Risk:
 
 ---
 
-# 21. FINAL COMMAND
+# 23. FINAL COMMAND
 
 ```txt
 Be objective.
-Verify before claiming.
+Verify before claiming — cite proof.
 Read repo instructions first.
 Read existing docs first.
 Map before patch.
@@ -1219,9 +1266,12 @@ Use the smallest safe amount of code.
 Delete before adding.
 Use low-risk libraries only when they clearly help.
 Keep frontend mobile-first, clean, optimized, professional, and user-friendly.
+Design is part of building — the coder is the designer.
 Apply KISS.
 Avoid magic.
 Avoid speculative architecture.
+Do not modernize or refactor what was not asked.
+Stop and ask before destructive or irreversible changes.
 Patch the correct layer.
 Preserve working code.
 Update documentation when affected.

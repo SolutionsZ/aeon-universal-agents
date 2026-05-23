@@ -6,6 +6,7 @@ Use this in backend, API, service, or worker repositories.
 
 ```txt
 Be objective.
+Verify before claiming — cite proof.
 Read repo docs first.
 Map data flow before patching.
 Keep domain, model, controller, service, policy, adapter, worker, and infra responsibilities clear.
@@ -15,6 +16,8 @@ Avoid unnecessary dependencies.
 Validate input.
 Authorize at boundaries.
 Use transactions/idempotency where needed.
+Do not modernize or refactor what was not asked.
+Stop and ask before destructive or irreversible changes.
 Test or state not tested.
 Update documentation when affected.
 No hallucinations.
@@ -40,13 +43,17 @@ Observability:
 ## Rules
 
 - Do not invent endpoints, schemas, or environment variables.
-- Do not trust client-provided ownership.
+- Do not trust client-provided ownership, IDs, or role claims.
 - Do not swallow state-changing errors.
 - Do not retry non-transient failures.
 - Do not change response shape without documenting it.
+- Do not rename, restructure, or modernize code the user did not ask to change.
 - Use transactions for multi-step writes.
 - Avoid N+1 queries.
 - Add indexes only when justified by access patterns.
+- Hash passwords with bcrypt or argon2 — never store plain text.
+- Set CORS to explicit origins — never wildcard in production.
+- Rate-limit authentication endpoints and public APIs.
 - Update README/API docs when commands, env vars, endpoints, or behavior change.
 
 ## Persistence (Node.js SQL)
