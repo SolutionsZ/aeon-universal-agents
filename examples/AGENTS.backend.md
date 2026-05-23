@@ -49,6 +49,18 @@ Observability:
 - Add indexes only when justified by access patterns.
 - Update README/API docs when commands, env vars, endpoints, or behavior change.
 
+## Persistence (Node.js SQL)
+
+```txt
+Small site / tool / prototype → SQLite
+Production / multi-user / team   → PostgreSQL
+Node.js SQL projects             → Sequelize models + migrations
+```
+
+- Do not use PostgreSQL when SQLite is enough.
+- Do not change schema without a Sequelize migration.
+- Keep SQL out of controllers and views.
+
 ## Output
 
 ```txt

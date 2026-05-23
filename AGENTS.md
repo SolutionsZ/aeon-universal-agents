@@ -328,7 +328,7 @@ Build order:
 5. validation
 6. service logic
 7. interface/controller
-8. persistence adapter if needed
+8. persistence adapter if needed (right-size DB; Sequelize migrations for Node.js SQL)
 9. tests or manual verification
 10. limits / next steps
 ```
@@ -372,6 +372,7 @@ Use a library when it is clearly beneficial:
 - cryptography
 - date/time/timezone complexity
 - database drivers
+- ORM and migrations (Sequelize for Node.js SQL projects)
 - official provider SDKs
 - PDF/image/media processing
 - schema validation
@@ -685,6 +686,51 @@ Rules:
 - validate before storage
 - do not store derived values unless needed for speed, audit, or reporting
 - do not trust client-calculated critical values unless explicitly designed
+
+## Database choice — right-size persistence
+
+Choose the smallest database that safely meets the objective:
+
+```txt
+SQLite
+- small websites and landing pages with light data needs
+- solo tools, scripts, CLI utilities
+- local-first apps, prototypes, vertical slices
+- single-user or very low write concurrency
+- zero-ops deployment (one file, no database server)
+
+PostgreSQL
+- multi-user production apps
+- concurrent writes, complex relations, reporting
+- teams, staging/production environments
+- when the project already uses PostgreSQL
+```
+
+Rules:
+- do not use PostgreSQL when SQLite is enough
+- do not use SQLite when concurrency, scale, or team workflow requires a server database
+- match the database already in the repo
+- state the choice in BUILD/ASSUMPTIONS for greenfield work
+
+## Migrations and models — Sequelize (Node.js SQL)
+
+When the project uses Node.js with a SQL database, use Sequelize for models and migrations unless the repo already uses another ORM.
+
+```txt
+SEQUELIZE CHECK
+Models in models/ (or project convention)?
+Migration created for every schema change?
+Migration applied before claiming DB work is done?
+Seeds only when the project already uses seeds?
+Existing Sequelize config and dialect respected?
+```
+
+Rules:
+- do not invent ad-hoc raw SQL migration files when the project uses Sequelize
+- do not change schema without a migration
+- keep models in the model layer — no SQL in controllers or views
+- for new Node.js + SQL greenfield work, default to Sequelize unless the repo dictates otherwise
+- use SQLite or PostgreSQL as the Sequelize dialect based on project size (see above)
 
 ---
 

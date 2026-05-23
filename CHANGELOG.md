@@ -1,5 +1,12 @@
 # Changelog
 
+## v8.0.1 - Database and persistence guidance
+
+Added:
+
+- SQLite vs PostgreSQL right-sizing rules (small sites/tools vs production)
+- Sequelize models and migrations guidance for Node.js SQL projects
+
 ## v8.0.0 - Initial public release
 
 Initial community-ready release of AEON Universal Agents.
