@@ -1,7 +1,7 @@
 # AEON UNIVERSAL AGENTS.md
 Version: 8.0
 Scope: universal, stack-neutral, core-code-first, objective, anti-hallucination.
-Purpose: guide any coding agent to inspect existing repo truth first, understand, structure, build, patch, document, test, and review software with minimal safe code, clean MVC separation, and professional mobile-first frontend practices.
+Purpose: guide any coding agent to inspect existing repo truth first, understand, structure, build, patch, document, test, and review software with minimal safe code, clean MVC separation, professional mobile-first frontend practices, and design discipline.
 
 ---
 
@@ -24,6 +24,9 @@ Your job:
 - preserve working behavior
 - test or state what was not tested
 - report risk honestly
+- when building UI, apply engineering and design best practices together — the coder is also the designer
+
+A feature is not done if it works but looks careless, confusing, or broken on mobile.
 
 Default output:
 
@@ -734,9 +737,13 @@ Rules:
 
 ---
 
-# 15A. FRONTEND QUALITY LAW
+# 15A. FRONTEND AND DESIGN LAW
 
-Any frontend work must be clean, professional, mobile-friendly, optimized, and user-friendly.
+Any frontend work must be clean, professional, mobile-friendly, optimized, user-friendly, and well designed.
+
+Design is not a separate phase after coding.
+The engineer is also the designer.
+Ship UI that is clear, intentional, and trustworthy — not just functional.
 
 This applies to:
 ```txt
@@ -750,7 +757,38 @@ forms
 admin panels
 landing pages
 embedded widgets
+CLI/API output formatting when user-facing
 ```
+
+## Design discipline
+
+Good design here means practical product design, not decoration.
+
+```txt
+DESIGN CHECK
+Visual hierarchy:
+Spacing rhythm:
+Typography scale:
+Color purpose:
+Alignment:
+Whitespace:
+Consistency with existing UI:
+Primary action obvious:
+Secondary actions subdued:
+No clutter:
+No broken mobile layout:
+Looks intentional, not accidental:
+```
+
+Design rules:
+- make the primary action obvious
+- use spacing and typography to create hierarchy — not random font sizes
+- use color with purpose: status, emphasis, affordance — not noise
+- keep alignment clean; avoid cramped or uneven layouts
+- preserve existing design language unless asked to change it
+- prefer calm, readable, professional UI over flashy gimmicks
+- whitespace is a feature, not wasted space
+- if the UI feels ugly, confusing, or cramped, it is not finished
 
 Frontend baseline:
 
@@ -783,6 +821,7 @@ Rules:
 - Avoid clutter.
 - Avoid unnecessary animation.
 - Do not sacrifice usability for visual effects.
+- Do not ship "developer UI" when user-facing polish is required.
 - Optimize render paths.
 - Avoid unnecessary DOM work.
 - Avoid layout shifts where possible.
@@ -805,6 +844,7 @@ Does it improve clarity?
 Does it work on mobile?
 Does it work with touch?
 Does it handle loading/error/empty states?
+Does it look intentional and professional?
 Can it be simpler?
 ```
 
@@ -814,6 +854,7 @@ Frontend patch output should include when relevant:
 FRONTEND
 Mobile:
 UX:
+Design:
 Performance:
 Accessibility:
 Risk:
@@ -1084,6 +1125,7 @@ Why minimal:
 FRONTEND
 Mobile:
 UX:
+Design:
 Performance:
 Accessibility:
 Risk:

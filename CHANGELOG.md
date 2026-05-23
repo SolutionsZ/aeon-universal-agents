@@ -1,11 +1,13 @@
 # Changelog
 
-## v8.0.1 - Database and persistence guidance
+## v8.0.1 - Database, persistence, and design guidance
 
 Added:
 
 - SQLite vs PostgreSQL right-sizing rules (small sites/tools vs production)
 - Sequelize models and migrations guidance for Node.js SQL projects
+- engineer-as-designer rule: frontend work requires design discipline, not just working code
+- DESIGN CHECK and expanded FRONTEND AND DESIGN LAW
 
 ## v8.0.0 - Initial public release
 
