@@ -32,13 +32,23 @@ function printUsage() {
   console.log(`    --stdout        Print to stdout instead of writing file`);
   console.log(`    --json          Output as JSON (lint mode)`);
   console.log(`    --force         Overwrite existing AGENTS.md (init mode)`);
+  console.log(`    --profile <p>   Use a template profile (init mode)`);
   console.log(`    --no-color      Disable colored output`);
   console.log(`    -o <file>       Output file (default: AGENTS.md)`);
   console.log(`    -v, --version   Show version`);
   console.log(`    -h, --help      Show this help`);
   console.log('');
+  console.log(`  ${c.cyan}Profiles${c.reset} ${c.dim}(for init --profile)${c.reset}`);
+  console.log(`    core            Lean universal rules (~250 lines)`);
+  console.log(`    full            Full production doctrine (~1400 lines)`);
+  console.log(`    minimal         Bare minimum instructions`);
+  console.log(`    frontend        Frontend/UI-focused rules`);
+  console.log(`    backend         Backend/API-focused rules`);
+  console.log('');
   console.log(`  ${c.cyan}Examples${c.reset}`);
   console.log(`    ${c.dim}aeon init --stdout             Preview generated AGENTS.md${c.reset}`);
+  console.log(`    ${c.dim}aeon init --profile core        Use lean core template${c.reset}`);
+  console.log(`    ${c.dim}aeon init --profile full        Use full doctrine${c.reset}`);
   console.log(`    ${c.dim}aeon init --force              Generate and overwrite${c.reset}`);
   console.log(`    ${c.dim}aeon lint                      Analyze AGENTS.md in cwd${c.reset}`);
   console.log(`    ${c.dim}aeon lint --json AGENTS.md      JSON output for CI${c.reset}`);
@@ -100,13 +110,28 @@ function printScanProfile(profile) {
   }
 }
 
+const PROFILES = {
+  core: 'AEON_CORE.md',
+  full: 'AEON_UNIVERSAL_AGENTS.md',
+  minimal: 'examples/AGENTS.minimal.md',
+  frontend: 'examples/AGENTS.frontend.md',
+  backend: 'examples/AGENTS.backend.md',
+};
+
+function getProfileArg() {
+  const idx = args.indexOf('--profile');
+  if (idx === -1) return null;
+  return args[idx + 1] || null;
+}
+
 function runInit() {
-  const target = positional[0] || '.';
+  const target = positional.filter(p => p !== getProfileArg())[0] || '.';
   const root = path.resolve(target);
   const toStdout = flags.has('--stdout');
   const force = flags.has('--force');
   const outputIdx = args.indexOf('-o');
   const outputFile = outputIdx !== -1 ? args[outputIdx + 1] : path.join(root, 'AGENTS.md');
+  const profileName = getProfileArg();
 
   if (!fs.existsSync(root)) {
     console.error(fmt.err(`Directory not found: ${root}`));
@@ -115,10 +140,33 @@ function runInit() {
 
   console.log(fmt.banner());
 
-  const profile = scan(root);
-  printScanProfile(profile);
+  let content;
 
-  const content = generate(profile);
+  if (profileName) {
+    const templateFile = PROFILES[profileName];
+    if (!templateFile) {
+      console.error(fmt.err(`Unknown profile: ${profileName}`));
+      console.log(fmt.info(`Available: ${Object.keys(PROFILES).join(', ')}`));
+      process.exit(1);
+    }
+
+    const aeonRoot = path.resolve(__dirname, '..', '..', '..');
+    const templatePath = path.join(aeonRoot, templateFile);
+    if (!fs.existsSync(templatePath)) {
+      console.error(fmt.err(`Template not found: ${templateFile}`));
+      process.exit(1);
+    }
+
+    content = fs.readFileSync(templatePath, 'utf8');
+    const { c } = fmt;
+    console.log(fmt.heading('Profile'));
+    console.log(`  ${c.cyan}${profileName}${c.reset} ${c.dim}← ${templateFile}${c.reset}`);
+    console.log('');
+  } else {
+    const profile = scan(root);
+    printScanProfile(profile);
+    content = generate(profile);
+  }
 
   if (toStdout) {
     console.log(fmt.divider());

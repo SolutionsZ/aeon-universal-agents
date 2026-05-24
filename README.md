@@ -1,63 +1,53 @@
 # AEON Universal Agents
 
-**A universal `AGENTS.md` instruction standard plus a CLI for generating, scanning, and linting agent instruction files.**
+**Generate, lint, and improve `AGENTS.md` files for AI coding agents.**
 
-AEON Universal Agents is a practical, stack-neutral instruction file designed to make AI coding agents more objective, realistic, structured, and useful inside real software projects.
-
-It tells an agent how to inspect a repository, respect existing documentation, avoid hallucinations, keep MVC responsibilities clean, build from scratch when needed, patch existing code safely, use the smallest safe amount of code, document changes, and test honestly.
-
-This repository includes:
-
-- `AEON_UNIVERSAL_AGENTS.md` — the versioned canonical source (v9.0)
-- `AGENTS.md` — the file you copy into your own repo
-- `examples/` — scoped variants (minimal, frontend, backend, repo-template)
-- `tools/aeon-cli/` — CLI to generate, scan, and lint AGENTS.md files
-- `docs/` — step-by-step install guide for every major coding agent
-
-This repository is for developers who want AI agents to behave less like chatbots and more like disciplined engineering assistants.
+AEON is a universal `AGENTS.md` standard plus a zero-dependency CLI that helps coding agents read the repo first, avoid hallucinations, write less code, preserve structure, update docs, and test honestly.
 
 ---
 
-## Why this exists
+## Quick start
 
-Modern AI coding tools are powerful, but they often fail in predictable ways:
-
-- They hallucinate files, commands, APIs, and test results.
-- They add too much code.
-- They introduce unnecessary dependencies.
-- They ignore existing README files and repo instructions.
-- They rewrite working systems instead of patching the correct layer.
-- They overengineer simple tasks.
-- They mix business logic, UI logic, services, and persistence.
-- They forget to update documentation.
-- They produce frontend code that is not mobile-friendly, accessible, or user-friendly.
-
-AEON exists to reduce those failures.
-
-The core principle is simple:
-
-```txt
-Be objective.
-Verify before claiming.
-Read repo instructions first.
-Map before patch.
-Use core code first.
-Use the smallest safe amount of code.
-Keep MVC responsibilities clear.
-Keep frontend clean, mobile-first, professional, and user-friendly.
-Test or state not tested.
-No hallucinations.
-No fluff.
-Ship.
+```bash
+git clone https://github.com/SolutionsZ/aeon-universal-agents.git
+cd aeon-universal-agents/tools/aeon-cli
 ```
 
----
+**Generate an AGENTS.md for your project:**
 
-## What this file is
+```bash
+node bin/aeon.js init --stdout           # preview (auto-detects your stack)
+node bin/aeon.js init /path/to/project   # generate project-specific file
+```
 
-This repository contains a universal agent instruction standard.
+**Or use a template profile:**
 
-The canonical source file is `AEON_UNIVERSAL_AGENTS.md`. Copy it into your project as:
+```bash
+node bin/aeon.js init --profile core       # lean universal rules (~250 lines)
+node bin/aeon.js init --profile full       # full production doctrine (~1400 lines)
+node bin/aeon.js init --profile minimal    # bare minimum
+node bin/aeon.js init --profile frontend   # frontend/UI focused
+node bin/aeon.js init --profile backend    # backend/API focused
+```
+
+**Lint an existing AGENTS.md:**
+
+```bash
+node bin/aeon.js lint AGENTS.md
+```
+
+**Scan for all instruction files:**
+
+```bash
+node bin/aeon.js scan /path/to/project
+```
+
+Or copy directly:
+
+```bash
+cp AEON_CORE.md /path/to/your/project/AGENTS.md        # lean
+cp AEON_UNIVERSAL_AGENTS.md /path/to/your/project/AGENTS.md  # full
+```
 
 | Tool | Filename |
 |------|----------|
@@ -66,296 +56,167 @@ The canonical source file is `AEON_UNIVERSAL_AGENTS.md`. Copy it into your proje
 | GitHub Copilot | `.github/copilot-instructions.md` |
 | Cursor | `.cursor/rules/aeon.mdc` |
 
-The recommended default is `AGENTS.md` — a growing convention for giving coding agents project-specific instructions.
+---
 
-## CLI tool
+## CLI output example
 
-The `tools/aeon-cli/` directory contains a Node.js CLI for working with AGENTS.md files:
-
-```bash
-# Generate a new AGENTS.md for your project
-npx aeon-cli init
-
-# Scan your repo and suggest improvements
-npx aeon-cli scan
-
-# Lint an existing AGENTS.md for issues
-npx aeon-cli lint
 ```
+$ node bin/aeon.js lint AGENTS.md
 
-See `tools/aeon-cli/` for full documentation.
+  ╭─────────────────────╮
+  │  AEON CLI v3.0.0    │
+  ╰─────────────────────╯
+
+  ── Score ──
+  92 / A
+
+  ── Stats ──
+  248 lines  14 sections  8 code blocks
+
+  ── Rule Extraction ──
+  ████████████████████ 88% actionable
+  12 enforceable  8 actionable  2 vague  (22 total)
+
+  ── Coverage ──
+  ✓ Setup commands          ✓ Run commands
+  ✓ Test commands           ✓ Project structure
+  ✓ Do-not rules            ✓ Definition of done
+  ✓ Conventions             ✓ Security notes
+  – Error handling          – Environment config
+
+  0 errors  1 warnings  2 info
+```
 
 ---
 
-## What AEON teaches an agent to do
+## Before and after AEON
 
-AEON instructs coding agents to:
+**Without AEON — agent says:**
+
+> "I updated the API and tests pass."
+
+**What actually happened:**
+- did not run tests
+- changed response shape without versioning
+- ignored README
+- added 2 new dependencies
+- no docs update
+
+**With AEON — agent says:**
+
+> "Changed one validation guard in `src/policy/input.js:42`. Tests not run — no test command found in package.json. Docs not updated — public behavior did not change. Added: 3 lines. Removed: 1 line. Risk: low."
+
+---
+
+## What this repository includes
+
+```txt
+AGENTS.md                      ← canonical copy file (full standard)
+AEON_UNIVERSAL_AGENTS.md       ← versioned source (v9.0)
+AEON_CORE.md                   ← lean core version (~250 lines)
+tools/aeon-cli/                ← CLI: generate, scan, lint
+examples/                      ← scoped variants (minimal, frontend, backend)
+docs/INSTALL_FOR_DUMMIES.md    ← step-by-step setup for every coding agent
+```
+
+---
+
+## What AEON teaches agents to do
 
 ### 1. Stay objective
 
-Agents must not invent facts, files, commands, APIs, schemas, logs, benchmarks, or test results.
-
-If something is unknown, the agent must say so.
+Agents must not invent facts, files, commands, APIs, schemas, logs, or test results.
 
 ```txt
-VERIFIED
-- ...
-
-NOT VERIFIED
-- ...
-
-ASSUMPTION
-- ...
-
-IMPACT
-- ...
+VERIFIED         — what was actually checked
+NOT VERIFIED     — what was not checked
+ASSUMPTION       — what was assumed
+IMPACT           — what could go wrong
 ```
-
----
 
 ### 2. Read the repository first
 
-Before changing code, the agent must check for existing project truth:
-
-```txt
-AGENTS.md
-CLAUDE.md
-.github/copilot-instructions.md
-.cursor/rules/
-README.md
-CONTRIBUTING.md
-DEVELOPMENT.md
-ARCHITECTURE.md
-docs/
-package scripts
-Makefile
-docker-compose.*
-.env.example
-CHANGELOG.md
-MIGRATION*
-```
-
-Existing repo documentation overrides generic assumptions.
-
----
+Before changing code, check for existing project truth: `README.md`, `AGENTS.md`, `package.json` scripts, `Makefile`, `docs/`, `.env.example`, and architecture files. Existing repo docs override generic assumptions.
 
 ### 3. Use MVC as a thinking model
 
-AEON uses MVC broadly, not as a forced framework.
+Clear responsibility, not more folders:
 
 ```txt
-MODEL      data, state, schemas, persistence, domain rules
-VIEW       UI, rendered output, documents, reports, CLI/API output
-CONTROLLER input handling, routes, commands, orchestration
-SERVICE    reusable operations, APIs, storage, mail, queues, integrations
-POLICY     validation, permissions, limits, business constraints
-ADAPTER    mapping between formats, vendors, protocols, APIs, databases
-WORKER     background jobs, scheduled tasks, queue consumers
-INFRA      runtime, deployment, networking, CI/CD, observability
+MODEL       data, state, schemas, persistence
+VIEW        UI, rendered output, API responses
+CONTROLLER  input handling, routes, orchestration
+SERVICE     operations, integrations, mail, queues
+POLICY      validation, permissions, limits
+ADAPTER     format/vendor/protocol translation
+WORKER      background jobs, scheduled tasks
+INFRA       deployment, CI/CD, observability
 ```
-
-The goal is clear responsibility, not more folders.
-
----
 
 ### 4. Build from scratch properly
 
-For greenfield work, AEON tells the agent to start with a runnable vertical slice:
+Start with a runnable vertical slice, not architecture theater:
 
 ```txt
-input -> validation -> action -> output/state change -> error path -> run/test command
+input → validation → action → output → error path → run command
 ```
-
-No architecture theater.
-No Phase 3 before Phase 1 works.
-No speculative systems.
-
----
 
 ### 5. Use core code first
 
-“Vanilla” does not mean JavaScript.
+Use the language and runtime directly. Libraries when justified. Frameworks when beneficial. No dependency-first thinking.
 
-It means core-code engineering:
+### 6. Write the smallest safe amount of code
 
-```txt
-core language
-standard library
-existing project utilities
-small local helper
-focused low-risk library
-framework
-```
-
-Libraries and frameworks are allowed when they are beneficial, low-risk, and justified.
-
----
-
-### 6. Use the smallest safe amount of code
-
-More code is not better code.
-
-AEON pushes agents to:
-
-- delete before adding
-- reuse before creating
-- fix locally before rewriting
-- avoid speculative architecture
-- avoid abstractions without real pressure
-- avoid dependency-first thinking
-
-Agents must report code economy:
-
-```txt
-CODE ECONOMY
-Added:
-Removed:
-Net complexity:
-Why minimal:
-```
-
----
+Delete before adding. Reuse before creating. No speculative architecture. Report code economy.
 
 ### 7. Keep frontend clean and professional
 
-Frontend work must be:
-
-- mobile-first
-- responsive
-- accessible
-- fast
-- readable
-- professional
-- user-friendly
-- consistent
-- touch-friendly
-- clear in loading, empty, success, and error states
-
-KISS applies:
-
-```txt
-The user should understand what to do without explanation.
-```
-
----
+Mobile-first. Responsive. Accessible. Fast. Touch-friendly. Clear loading, empty, and error states. The coder is also the designer.
 
 ### 8. Keep documentation updated
 
-Every change must consider documentation.
-
-The agent checks whether the change affects:
-
-- setup
-- run commands
-- test commands
-- environment variables
-- dependencies
-- public API/output
-- data model
-- architecture
-- deployment
-- migrations
-- known limitations
-
-Final output must include:
-
-```txt
-DOCS
-Updated:
-Not updated:
-Reason:
-```
+Every change considers: setup, run commands, test commands, env vars, dependencies, API shape, data model, architecture, deployment, known limits.
 
 ---
 
-## Install manual
+## CLI details
 
-For step-by-step setup instructions for Claude Code, OpenAI Codex, GitHub Copilot, Cursor, OpenCode, Aider, Continue, Windsurf, and generic AI chat, see:
+The CLI lives in `tools/aeon-cli/`. Zero dependencies. Pure Node.js (`fs` + `path`). Requires Node 18+.
 
-```txt
-docs/INSTALL_FOR_DUMMIES.md
-```
+### `aeon init` — Generate AGENTS.md
 
-## Quick start
+Scans your project and generates a project-specific AGENTS.md.
 
-### Option 1: Use as `AGENTS.md`
+| Detects | Examples |
+|---------|----------|
+| Runtime | Node.js, Python, Go, Rust, Ruby, PHP, Java, Elixir |
+| Framework | Express, Next, React, Vue, Django, Flask, FastAPI, Gin, Actix, + more |
+| ORM | Sequelize, Prisma, TypeORM, Drizzle, Mongoose, SQLAlchemy, + more |
+| Tests | Jest, Vitest, Mocha, pytest, go test, cargo test |
+| Linter | ESLint, Biome, Prettier, Ruff, Flake8, mypy |
+| Structure | MVC pattern, src/lib layout, test dirs, Docker, CI/CD |
 
-Copy the universal file into your repository root:
+### `aeon lint` — Analyze quality
 
-```bash
-cp AEON_UNIVERSAL_AGENTS.md AGENTS.md
-```
+Scores your AGENTS.md across five dimensions:
 
-Then commit it:
+| Dimension | Weight | Checks |
+|-----------|--------|--------|
+| Essential coverage | 30% | Setup, run, test commands; structure; do-not rules |
+| Recommended coverage | 15% | Conventions, security, error handling, env config |
+| Quality | 20% | Vague language, anti-patterns, duplicates, empty sections |
+| Size discipline | 10% | Line count vs agent context window limits |
+| Rule actionability | 25% | Enforceable vs actionable vs vague rules |
 
-```bash
-git add AGENTS.md
-git commit -m "Add AEON universal agent instructions"
-```
+### `aeon scan` — Discover instruction files
 
-Your coding agent should now read it as project guidance.
-
----
-
-### Option 2: Use with Claude Code
-
-Copy it as:
-
-```bash
-cp AEON_UNIVERSAL_AGENTS.md CLAUDE.md
-```
-
----
-
-### Option 3: Use with GitHub Copilot custom instructions
-
-Copy the relevant sections into:
-
-```txt
-.github/copilot-instructions.md
-```
-
----
-
-### Option 4: Use with Cursor
-
-Place it in:
-
-```txt
-.cursor/rules/aeon.mdc
-```
-
----
-
-## Recommended repository structure
-
-A simple public repository can look like this:
-
-```txt
-aeon-universal-agents/
-├── README.md
-├── AGENTS.md
-├── AEON_UNIVERSAL_AGENTS.md
-├── LICENSE
-└── examples/
-    ├── AGENTS.minimal.md
-    ├── AGENTS.frontend.md
-    └── AGENTS.backend.md
-```
-
-Recommended:
-
-- Keep `AEON_UNIVERSAL_AGENTS.md` as the versioned source file.
-- Keep `AGENTS.md` as the practical file users can copy directly.
-- Add examples later if the community requests them.
+Finds all agent instruction files in a repo: `AGENTS.md`, `CLAUDE.md`, `.cursorrules`, `copilot-instructions.md`, `.cursor/rules/*.md`.
 
 ---
 
 ## Suggested usage inside a project
 
-After adding AEON to a repo, customize it with project-specific facts.
-
-Add a section to your `AGENTS.md` with repo-specific instructions:
+After adding AEON to a repo, customize it with project-specific facts:
 
 **Setup and commands:**
 
@@ -371,7 +232,6 @@ npm run lint
 - API routes are in `src/routes`.
 - Business logic is in `src/services`.
 - Database access is in `src/db`.
-- UI components are in `src/components`.
 
 **Do-not rules:**
 
@@ -379,177 +239,54 @@ npm run lint
 - Do not change public API response shapes without updating docs.
 - Do not claim tests passed unless they were run.
 
-AEON is the universal base.
-Your repo-specific notes should override it.
+AEON is the universal base. Your repo-specific notes should override it.
+
+---
+
+## Install manual
+
+For step-by-step setup instructions for Claude Code, OpenAI Codex, GitHub Copilot, Cursor, OpenCode, Aider, Continue, Windsurf, and generic AI chat, see `docs/INSTALL_FOR_DUMMIES.md`.
 
 ---
 
 ## Design philosophy
 
-AEON is built around a few hard beliefs:
-
-### Objective beats confident
-
-An agent that says “I do not know” is better than an agent that invents.
-
-### Small beats bloated
-
-The best code is the smallest code that safely achieves the objective.
-
-### Core code beats magic
-
-Use the language and runtime directly where practical.
-
-### Existing docs matter
-
-The repository’s README, architecture docs, and agent instructions are the project truth.
-
-### MVC is a thinking tool
-
-Clear responsibility matters in every stack.
-
-### Frontend quality matters
-
-A feature is not finished if it works technically but is bad for users.
-
-### Documentation is part of the codebase
-
-If behavior changes, docs may need to change.
+| Principle | Meaning |
+|-----------|---------|
+| Objective beats confident | "I do not know" beats inventing facts |
+| Small beats bloated | Smallest safe code wins |
+| Core code beats magic | Use the language directly where practical |
+| Existing docs matter | The repo's README is project truth |
+| MVC is a thinking tool | Clear responsibility in every stack |
+| Frontend quality matters | Not done if it works but looks broken |
+| Docs are part of code | Behavior changes may need doc changes |
 
 ---
 
 ## Who this is for
 
-AEON is useful for:
-
-- solo developers
-- open-source maintainers
-- teams using AI coding agents
-- developers working with large codebases
-- developers who want less hallucination and less bloat
-- teams that want more consistent AI-generated patches
-- people using Claude Code, Codex, Copilot, Cursor, or other coding agents
-
----
-
-## What this is not
-
-AEON is not:
-
-- a framework
-- a package
-- a runtime
-- a prompt gimmick
-- a replacement for engineering judgment
-- a guarantee that an AI agent will always be correct
-
-It is an instruction standard that pushes agents toward better engineering behavior.
-
----
-
-## Roadmap
-
-Possible future additions:
-
-- minimal version
-- frontend-focused version
-- backend/API-focused version
-- security-focused version
-- AGENTS.md examples for common stacks
-- comparison examples: bad agent output vs AEON-guided output
-- community translations
-- contribution guide
+- Solo developers and open-source maintainers
+- Teams using AI coding agents
+- Developers who want less hallucination and less bloat
+- People using Claude Code, Codex, Copilot, Cursor, or other coding agents
 
 ---
 
 ## Contributing
 
-Contributions are welcome.
-
-Good contributions:
-
-- make the file more universal
-- reduce hallucination risk
-- improve safety
-- improve clarity
-- reduce bloat
-- improve frontend/user-quality guidance
-- improve documentation discipline
-- improve test and verification discipline
-
-Avoid contributions that:
-
-- make it specific to one company or project
-- force one framework or stack
-- add hype language
-- make the file unnecessarily long
-- encourage agents to claim things they did not verify
+See `CONTRIBUTING.md`. Good contributions make the standard more universal, reduce hallucination risk, improve safety, reduce bloat, or improve clarity. Avoid contributions that force one framework, add hype language, or encourage agents to claim things they did not verify.
 
 ---
 
 ## Versioning
 
-This repository uses simple document versioning.
+Current version: **v9**
 
-Current version:
-
-```txt
-v9
-```
-
-Recommended stable filename:
-
-```txt
-AGENTS.md
-```
-
-Versioned source filename:
-
-```txt
-AEON_UNIVERSAL_AGENTS.md
-```
+- `AGENTS.md` — canonical copy file
+- `AEON_UNIVERSAL_AGENTS.md` — versioned source
 
 ---
 
 ## License
 
 MIT. See `LICENSE`.
-
----
-
-## Core command
-
-```txt
-Be objective.
-Verify before claiming.
-Read repo instructions first.
-Read existing docs first.
-Map before patch.
-Keep MVC responsibilities clear.
-Build from contract.
-Use core code first.
-Use the smallest safe amount of code.
-Delete before adding.
-Use low-risk libraries only when they clearly help.
-Keep frontend mobile-first, clean, optimized, professional, and user-friendly.
-Apply KISS.
-Avoid magic.
-Avoid speculative architecture.
-Patch the correct layer.
-Preserve working code.
-Update documentation when affected.
-Test or state not tested.
-State risk.
-No hallucinations.
-No fluff.
-Ship.
-```
-
----
-
-## Final note
-
-AEON is simple on purpose.
-
-The goal is not to make agents talk more.
-The goal is to make them work better.

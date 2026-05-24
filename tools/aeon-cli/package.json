@@ -1,10 +1,11 @@
 {
-  "name": "aeon-cli",
+  "name": "@solutionsz/aeon-cli",
   "version": "3.0.0",
-  "description": "Generate and analyze AGENTS.md files from any codebase",
+  "description": "Generate, scan, and lint AGENTS.md files for AI coding agents. Zero dependencies.",
   "bin": {
     "aeon": "./bin/aeon.js"
   },
+  "type": "commonjs",
   "license": "MIT",
   "engines": {
     "node": ">=18"
@@ -12,5 +13,18 @@
   "files": [
     "bin/",
     "lib/"
-  ]
+  ],
+  "keywords": [
+    "agents-md",
+    "ai-agents",
+    "coding-agents",
+    "linter",
+    "generator",
+    "developer-tools"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SolutionsZ/aeon-universal-agents.git",
+    "directory": "tools/aeon-cli"
+  }
 }

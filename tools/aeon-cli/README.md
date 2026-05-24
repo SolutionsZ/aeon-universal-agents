@@ -9,12 +9,19 @@ Generate and analyze AGENTS.md files from any codebase. Zero dependencies. Pure 
 Scans your project and creates a project-specific AGENTS.md following AEON principles.
 
 ```bash
-node bin/aeon.js init --stdout       # preview output
-node bin/aeon.js init                # write AGENTS.md
-node bin/aeon.js init /path/to/repo  # scan different directory
-node bin/aeon.js init --force        # overwrite existing
-node bin/aeon.js init -o CUSTOM.md   # custom output file
+node bin/aeon.js init --stdout              # preview output
+node bin/aeon.js init                       # write AGENTS.md
+node bin/aeon.js init /path/to/repo         # scan different directory
+node bin/aeon.js init --force               # overwrite existing
+node bin/aeon.js init -o CUSTOM.md          # custom output file
+node bin/aeon.js init --profile core        # lean universal rules (~250 lines)
+node bin/aeon.js init --profile full        # full production doctrine (~1400 lines)
+node bin/aeon.js init --profile minimal     # bare minimum
+node bin/aeon.js init --profile frontend    # frontend/UI focused
+node bin/aeon.js init --profile backend     # backend/API focused
 ```
+
+**Profiles** use pre-built templates from the AEON repo instead of scanning. Without `--profile`, the CLI scans your project and generates a project-specific file.
 
 **What it detects:**
 
