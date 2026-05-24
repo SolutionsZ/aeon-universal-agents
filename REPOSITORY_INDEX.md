@@ -18,6 +18,12 @@
 - `examples/AGENTS.backend.md` — backend/API-focused version.
 - `examples/AGENTS.repo-template.md` — template for adapting AEON to a specific repository.
 
+## Tools
+
+- `tools/aeon-cli/` — CLI tool to generate and analyze AGENTS.md files from any codebase.
+  - `aeon init` — scans project, generates project-specific AGENTS.md
+  - `aeon lint` — analyzes AGENTS.md quality, completeness, and anti-patterns
+
 ## Docs
 
 - `docs/INSTALL_FOR_DUMMIES.md` — step-by-step installation guide for common coding agents.

@@ -1,3 +1,8 @@
+---
+description: 
+alwaysApply: true
+---
+
 # AEON UNIVERSAL AGENTS.md
 Version: 8.1
 Scope: universal, stack-neutral, core-code-first, objective, anti-hallucination.
