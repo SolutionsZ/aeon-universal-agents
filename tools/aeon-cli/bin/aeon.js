@@ -389,7 +389,12 @@ if (flags.has('-v') || flags.has('--version')) {
 } else if (command === 'scan') {
   runScan();
 } else if (!command || command.startsWith('-')) {
-  runDefault();
+  if (process.stdin.isTTY) {
+    const { run } = require('../lib/menu');
+    run().catch(() => process.exit(0));
+  } else {
+    runDefault();
+  }
 } else {
   console.error(fmt.err(`Unknown command: ${command}`));
   printUsage();
