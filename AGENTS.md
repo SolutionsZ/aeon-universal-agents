@@ -1557,11 +1557,14 @@ Rules:
 
 # 16. FRONTEND AND DESIGN LAW
 
-Any frontend work must be clean, professional, mobile-friendly, optimized, user-friendly, and well designed.
+Any frontend work must be enterprise-grade: refined, intentional, and indistinguishable from professional product teams.
 
 Design is not a separate phase after coding.
 The engineer is also the designer.
-Ship UI that is clear, intentional, and trustworthy — not just functional.
+Ship UI that looks like it was built by a company that charges for its product — not a developer weekend project.
+
+The standard is not "does it work" or "is it clean enough."
+The standard is: would this hold up next to Sony, Stripe, Linear, or Apple's interfaces?
 
 This applies to:
 ```txt
@@ -1580,33 +1583,161 @@ CLI/API output formatting when user-facing
 
 ## Design discipline
 
-Good design here means practical product design, not decoration.
+Good design means enterprise product design. Not decoration. Not templates. Not "Bootstrap with custom colors."
+
+Every UI decision must feel deliberate.
 
 ```txt
 DESIGN CHECK
 Visual hierarchy:
 Spacing rhythm:
-Typography scale:
-Color purpose:
-Alignment:
-Whitespace:
+Typography scale and weight:
+Color palette — restrained, purposeful:
+Alignment grid:
+Whitespace — generous, intentional:
 Consistency with existing UI:
 Primary action obvious:
 Secondary actions subdued:
+Surface depth — light, shadow, layering:
+Micro-interactions — subtle, purposeful:
 No clutter:
+No template / generic SaaS feel:
 No broken mobile layout:
-Looks intentional, not accidental:
+Looks premium, not accidental:
 ```
 
 Design rules:
-- make the primary action obvious
-- use spacing and typography to create hierarchy — not random font sizes
-- use color with purpose: status, emphasis, affordance — not noise
-- keep alignment clean; avoid cramped or uneven layouts
-- preserve existing design language unless asked to change it
-- prefer calm, readable, professional UI over flashy gimmicks
-- whitespace is a feature, not wasted space
-- if the UI feels ugly, confusing, or cramped, it is not finished
+- Make the primary action immediately obvious.
+- Use spacing and typography weight to create hierarchy — not random font sizes or bold everywhere.
+- Use color with restraint: a tight palette of 2-3 accent colors maximum. Muted tones over saturated primaries.
+- Whitespace is a premium signal. Generous spacing communicates confidence and clarity.
+- Use subtle surface depth: light shadows, layered backgrounds, frosted glass where appropriate. Flat design without depth looks cheap.
+- Typography matters. Use intentional font weights: light for large headings, medium for body, semibold for emphasis. Avoid default browser fonts in production.
+- Align everything to an implicit grid. Misaligned elements destroy trust instantly.
+- Animate only with purpose: micro-interactions for feedback, transitions for state changes. Never decorative animation.
+- Every interactive element must feel responsive: hover states, active states, focus rings, transitions.
+- Avoid the "SaaS template" look: rounded-everything, gradient buttons, card grids with drop shadows. Build something that looks unique.
+- Preserve existing design language unless asked to change it.
+- If it looks like a free template, it is not finished.
+- If it looks like a developer built it without a designer, it is not finished.
+
+## Theme selection
+
+Do not default to dark mode. Choose the theme that fits the product, audience, and brand.
+
+```txt
+THEME CHECK
+Product type:
+Target audience:
+Brand tone:
+Reading density:
+Existing brand direction:
+Decision:
+```
+
+Both light and dark can be enterprise-grade:
+- Light themes signal openness, clarity, and trust. Think Apple, Porsche, Aesop, Stripe docs.
+- Dark themes signal focus, immersion, and drama. Think Sony, Linear, Vercel, creative portfolios.
+- Choose based on product context, not personal preference or developer habit.
+- Whichever theme is chosen, execute it with the same level of refinement.
+- If both themes are needed, design both as first-class — never auto-invert colors.
+
+## Enterprise design principles
+
+```txt
+ENTERPRISE DESIGN
+Restraint          — say more with less
+Precision          — every pixel is intentional
+Depth              — surfaces, shadows, layers create hierarchy
+Typography         — weight and scale create rhythm
+Color discipline   — muted palette, accent with purpose
+Negative space     — breathing room signals quality
+Consistency        — one pattern, everywhere
+Micro-feedback     — hover, press, focus, transition
+Material quality   — surfaces feel tactile, not flat cardboard
+Uniqueness         — does not look like a template
+```
+
+Rules:
+- Prefer muted, sophisticated color palettes over bright saturated SaaS colors.
+- Use subtle gradients, not aggressive ones. Think pearl, not rainbow.
+- Use proper typographic scale: distinct sizes for h1/h2/h3/body/caption with intentional line heights.
+- Inputs and buttons must have visible hover, focus, and active states with smooth transitions.
+- Cards and surfaces should have layered depth: background → surface → elevated surface.
+- Borders should be subtle or replaced by shadow/spacing. Avoid thick visible borders.
+- Icons should be consistent in style, weight, and size.
+- Loading states should feel polished: skeleton screens over spinners, smooth transitions over hard cuts.
+- Empty states should be designed, not an afterthought.
+- Error states should be calm and helpful, not red-alert panic.
+- When implementing both light and dark mode, design each as its own complete palette — not just inverted colors.
+
+## Animation and motion
+
+Smooth, purposeful animation elevates a product from functional to premium.
+Choose the right tool for the complexity level. Do not add libraries for effects achievable with CSS alone.
+
+```txt
+ANIMATION CHECK
+Purpose of animation:
+Complexity level:
+Performance impact:
+Reduced-motion fallback:
+Library needed:
+Library justified:
+Tested on target devices:
+```
+
+Animation approach — choose by complexity:
+
+```txt
+LEVEL 1 — CSS only (default)
+CSS transitions for state changes: hover, focus, visibility, color.
+CSS @keyframes for self-contained loops: loaders, pulses, marquees.
+Use when: simple reveals, hover effects, loading indicators.
+
+LEVEL 2 — CSS + IntersectionObserver
+Scroll-triggered class toggles with CSS transitions.
+Use when: fade-in on scroll, lazy visibility, simple reveal sequences.
+
+LEVEL 3 — requestAnimationFrame
+Custom real-time loops: cursor tracking, parallax, physics, canvas.
+Use when: continuous motion tied to pointer or time, not scroll position.
+
+LEVEL 4 — Animation library
+Complex scroll-driven timelines, pinned sections, staggered sequences, 
+coordinated multi-element animation, horizontal scroll galleries.
+Choose a mature, performant library that fits the project.
+Use when: the effect cannot be achieved reliably with CSS + observers.
+
+LEVEL 5 — 3D / WebGL library
+Three-dimensional scenes, shader effects, particle systems, immersive visuals.
+Choose a mature 3D library that fits the project.
+Use when: the product requires 3D rendering or GPU-accelerated visual effects.
+```
+
+Rules:
+- Start at the lowest level that achieves the effect. Escalate only when needed.
+- Every animation must have a purpose: guide attention, provide feedback, or create spatial context.
+- Never animate purely for decoration.
+- Always provide `prefers-reduced-motion` fallback that disables or simplifies all motion.
+- Keep animation performant: animate `transform` and `opacity`. Avoid animating layout properties (`width`, `height`, `top`, `left`, `margin`, `padding`).
+- Use custom easing curves (`cubic-bezier`) over linear or default ease — motion should feel physical, not robotic.
+- Test animation on real target devices, especially mobile. 60fps is the minimum standard.
+- Do not ship animation that you have not verified works correctly. If an advanced technique is uncertain, fall back to a simpler approach that is guaranteed to work.
+- Do not use advanced features of a library (pinning, horizontal scroll, complex timelines) unless you are certain they work in the specific layout. Broken animation is worse than no animation.
+- Always include a working fallback path when using external libraries loaded from CDN — the library may fail to load.
+
+Frontend performance law for animation:
+```txt
+ANIMATION PERFORMANCE
+60fps minimum on target devices.
+No layout thrashing.
+No forced synchronous reflows.
+GPU-composited properties only (transform, opacity).
+Debounce resize handlers.
+Cancel stale animation on route/view change.
+Passive scroll listeners when not preventing default.
+```
 
 Frontend baseline:
 
@@ -1617,39 +1748,41 @@ Responsive:
 Accessible:
 Fast:
 Readable:
-Professional:
-User-friendly:
-Consistent:
-Error states:
-Loading states:
-Empty states:
+Enterprise-grade design:
 Touch-friendly:
 Cross-browser risk:
+Error states designed:
+Loading states designed:
+Empty states designed:
+Micro-interactions present:
+Typography intentional:
+Color palette restrained:
 ```
 
 Rules:
 - Design mobile-first unless the product is explicitly desktop-only.
-- Use responsive layouts.
+- Use responsive layouts with intentional breakpoints.
 - Avoid fixed widths that break on small screens.
-- Make tap targets usable.
-- Keep forms simple and clear.
-- Show clear loading, empty, success, and error states.
-- Keep visual hierarchy clean.
-- Use consistent spacing, typography, and interaction patterns.
-- Avoid clutter.
-- Avoid unnecessary animation.
+- Make tap targets usable (minimum 44px).
+- Keep forms simple, clean, and well-spaced.
+- Show designed loading, empty, success, and error states.
+- Keep visual hierarchy clean through weight, size, and spacing — not color alone.
+- Use consistent spacing, typography, and interaction patterns throughout.
+- Avoid clutter. Remove before adding.
+- Animate only with purpose. Every transition should have a reason.
 - Do not sacrifice usability for visual effects.
 - Do not ship "developer UI" when user-facing polish is required.
 - Optimize render paths.
 - Avoid unnecessary DOM work.
-- Avoid layout shifts where possible.
+- Avoid layout shifts.
 - Keep assets reasonably sized.
-- Preserve accessibility basics: labels, focus states, keyboard navigation, semantic markup where relevant.
-- Professional means calm, clear, trustworthy, and consistent.
+- Preserve accessibility: labels, focus states, keyboard navigation, semantic markup.
+- Professional means premium, refined, trustworthy, and consistent.
 
 KISS frontend rule:
 ```txt
 The user should understand what to do without explanation.
+The user should feel the product is worth paying for.
 ```
 
 Before adding frontend complexity:
@@ -1662,7 +1795,9 @@ Does it improve clarity?
 Does it work on mobile?
 Does it work with touch?
 Does it handle loading/error/empty states?
-Does it look intentional and professional?
+Does it look enterprise-grade?
+Does it feel unique or like a template?
+Would this hold up in a product demo?
 Can it be simpler?
 ```
 
@@ -1672,7 +1807,8 @@ Frontend patch output should include when relevant:
 FRONTEND
 Mobile:
 UX:
-Design:
+Design quality:
+Enterprise grade:
 Performance:
 Accessibility:
 Risk:
@@ -1753,6 +1889,33 @@ Before final:
 - inspect diff for unintended changes
 - verify the change from a fresh user perspective, not just code inspection
 - state remaining risk
+
+## Unit test discipline
+
+For new logic, bug fixes, validation rules, parsers, calculations, adapters, and business rules, add or update unit tests when the repository has a test setup.
+
+Rules:
+
+- If a test framework exists, use the existing framework.
+- Do not introduce a new test framework without approval.
+- For bug fixes, first create or identify a failing test that reproduces the bug when practical.
+- For new logic, test normal cases, edge cases, invalid input, and failure paths.
+- Keep tests small, focused, and deterministic.
+- Do not mock what can be tested directly with simple input/output.
+- Do not write brittle tests that depend on timing, random order, or external services unless controlled.
+- If no test framework exists, provide a minimal manual verification or ask before adding one.
+
+Output:
+
+```txt
+UNIT TESTS
+Added:
+Updated:
+Not added:
+Reason:
+Command:
+Result:
+```
 
 ---
 
