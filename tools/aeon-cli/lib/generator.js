@@ -11,6 +11,15 @@ const FRAMEWORK_NOTES = {
   vue: 'Vue.js UI framework',
   svelte: 'Svelte UI framework',
   angular: 'Angular framework',
+  django: 'Django web framework',
+  flask: 'Flask web framework',
+  fastapi: 'FastAPI async framework',
+  gin: 'Gin HTTP framework',
+  echo: 'Echo HTTP framework',
+  fiber: 'Fiber HTTP framework',
+  actix: 'Actix-web framework',
+  rocket: 'Rocket web framework',
+  axum: 'Axum web framework',
 };
 
 const ORM_NOTES = {
@@ -20,6 +29,10 @@ const ORM_NOTES = {
   drizzle: 'Drizzle ORM — schema-first, use drizzle-kit for migrations',
   mongoose: 'Mongoose ODM — schemas define MongoDB document structure',
   knex: 'Knex query builder — use knex migrations for schema changes',
+  sqlalchemy: 'SQLAlchemy ORM — use Alembic migrations for schema changes',
+  'django-orm': 'Django ORM — run `python manage.py makemigrations` then `python manage.py migrate`',
+  tortoise: 'Tortoise ORM — use Aerich for migrations',
+  peewee: 'Peewee ORM — use peewee-migrate for schema changes',
 };
 
 function scriptLine(scripts, key, fallback) {
@@ -64,15 +77,27 @@ function buildSetupSection(profile) {
 
 function buildRunSection(profile) {
   const lines = ['## Run', ''];
-  const { scripts } = profile;
+  const { scripts, runtime } = profile;
 
   lines.push('```bash');
-  const dev = scriptLine(scripts, 'dev') || scriptLine(scripts, 'start:dev');
-  const start = scriptLine(scripts, 'start');
-
-  if (dev) lines.push(dev + '   # development');
-  if (start && start !== dev) lines.push(start + '  # production');
-  if (!dev && !start) lines.push('# TODO: add run command');
+  if (runtime === 'node') {
+    const dev = scriptLine(scripts, 'dev') || scriptLine(scripts, 'start:dev');
+    const start = scriptLine(scripts, 'start');
+    if (dev) lines.push(dev + '   # development');
+    if (start && start !== dev) lines.push(start + '  # production');
+    if (!dev && !start) lines.push('# TODO: add run command');
+  } else if (runtime === 'python') {
+    if (profile.stack.framework === 'django') lines.push('python manage.py runserver');
+    else if (profile.stack.framework === 'flask') lines.push('flask run');
+    else if (profile.stack.framework === 'fastapi') lines.push('uvicorn main:app --reload');
+    else lines.push('python main.py');
+  } else if (runtime === 'go') {
+    lines.push('go run .');
+  } else if (runtime === 'rust') {
+    lines.push('cargo run');
+  } else {
+    lines.push('# TODO: add run command');
+  }
   lines.push('```');
 
   return lines.join('\n');
@@ -80,17 +105,30 @@ function buildRunSection(profile) {
 
 function buildTestSection(profile) {
   const lines = ['## Test', ''];
-  const { scripts } = profile;
+  const { scripts, runtime } = profile;
 
   lines.push('```bash');
-  const test = scriptLine(scripts, 'test');
-  const lint = scriptLine(scripts, 'lint');
-  const typecheck = scriptLine(scripts, 'typecheck') || scriptLine(scripts, 'type-check') || scriptLine(scripts, 'tsc');
-
-  if (test) lines.push(test);
-  if (lint) lines.push(lint);
-  if (typecheck) lines.push(typecheck);
-  if (!test && !lint) lines.push('# TODO: add test commands');
+  if (runtime === 'node') {
+    const test = scriptLine(scripts, 'test');
+    const lint = scriptLine(scripts, 'lint');
+    const typecheck = scriptLine(scripts, 'typecheck') || scriptLine(scripts, 'type-check') || scriptLine(scripts, 'tsc');
+    if (test) lines.push(test);
+    if (lint) lines.push(lint);
+    if (typecheck) lines.push(typecheck);
+    if (!test && !lint) lines.push('# TODO: add test commands');
+  } else if (runtime === 'python') {
+    if (profile.stack.testFramework === 'pytest') lines.push('pytest');
+    else lines.push('python -m pytest');
+    if (profile.stack.linter) lines.push(profile.stack.linter + ' .');
+  } else if (runtime === 'go') {
+    lines.push('go test ./...');
+    lines.push('go vet ./...');
+  } else if (runtime === 'rust') {
+    lines.push('cargo test');
+    lines.push('cargo clippy');
+  } else {
+    lines.push('# TODO: add test commands');
+  }
   lines.push('```');
 
   return lines.join('\n');
@@ -138,16 +176,18 @@ function buildStructureSection(profile) {
 
 function buildStackSection(profile) {
   const { stack, runtime } = profile;
-  if (runtime !== 'node' || !stack.framework) return null;
+  if (!stack.framework && !stack.orm && !stack.testFramework) return null;
 
   const lines = ['## Stack', ''];
   const parts = [];
 
+  if (runtime !== 'node') parts.push(runtime.charAt(0).toUpperCase() + runtime.slice(1));
   if (stack.framework) parts.push(FRAMEWORK_NOTES[stack.framework] || stack.framework);
   if (stack.language === 'typescript') parts.push('TypeScript');
   if (stack.css) parts.push(stack.css.charAt(0).toUpperCase() + stack.css.slice(1) + ' CSS');
   if (stack.orm) parts.push(ORM_NOTES[stack.orm]?.split(' — ')[0] || stack.orm);
   if (stack.testFramework) parts.push(stack.testFramework + ' tests');
+  if (stack.linter) parts.push(stack.linter + ' linter');
   if (stack.bundler) parts.push(stack.bundler + ' bundler');
 
   parts.forEach(p => lines.push('- ' + p));
@@ -210,20 +250,6 @@ function buildDoNotSection(profile) {
   return lines.join('\n');
 }
 
-function buildDoneSection(profile) {
-  const { scripts } = profile;
-  const lines = ['## Done when', ''];
-
-  if (scripts.test) lines.push('- Tests pass (`npm test`)');
-  if (scripts.lint) lines.push('- Lint passes (`npm run lint`)');
-  if (scripts.typecheck || scripts['type-check']) lines.push('- Type check passes');
-  lines.push('- Change is the smallest safe diff');
-  lines.push('- No unintended side effects');
-  lines.push('- Documentation updated if public behavior changed');
-
-  return lines.join('\n');
-}
-
 function buildEnvSection(profile) {
   if (profile.envVars.length === 0) return null;
 
@@ -232,6 +258,73 @@ function buildEnvSection(profile) {
   lines.push('```');
   lines.push('');
   lines.push('All secrets and environment-specific config must use environment variables. Never hardcode.');
+
+  return lines.join('\n');
+}
+
+function buildSecuritySection(profile) {
+  const { stack, runtime } = profile;
+  const isWeb = stack.framework && /^(express|fastify|next|nuxt|koa|hono|django|flask|fastapi|gin|echo|fiber|actix|rocket|axum)$/.test(stack.framework);
+  if (!isWeb) return null;
+
+  const lines = ['## Security', ''];
+  lines.push('- Validate all input server-side — never trust the client');
+  lines.push('- Authorize at the resource level — check ownership, not just authentication');
+  lines.push('- Never hardcode secrets — use environment variables');
+  lines.push('- Never commit `.env`, API keys, tokens, or credentials');
+
+  if (runtime === 'node') {
+    lines.push('- Sanitize rendered output to prevent XSS');
+    lines.push('- Use `helmet` or equivalent security headers');
+    lines.push('- Hash passwords with `bcrypt` or `argon2` — never store plaintext');
+    lines.push('- Rate-limit authentication endpoints');
+  } else if (runtime === 'python') {
+    if (stack.framework === 'django') {
+      lines.push('- Use Django CSRF protection — do not disable it');
+      lines.push('- Use Django ORM parameterized queries — no raw SQL with string formatting');
+    }
+    lines.push('- Hash passwords with `bcrypt` or `argon2` — never store plaintext');
+    lines.push('- Sanitize output in templates to prevent XSS');
+  } else {
+    lines.push('- Sanitize rendered output to prevent XSS');
+    lines.push('- Hash passwords — never store plaintext');
+  }
+
+  return lines.join('\n');
+}
+
+function buildErrorHandlingSection(profile) {
+  const lines = ['## Error handling', ''];
+  lines.push('- Do not swallow errors that affect state — log or propagate them');
+  lines.push('- Never expose stack traces or internal details to users');
+  lines.push('- Convert internal errors to safe user-facing messages at boundaries');
+  lines.push('- Only retry transient failures (timeout, 503) — not validation or auth errors');
+
+  return lines.join('\n');
+}
+
+function buildDoneSection(profile) {
+  const { scripts, runtime } = profile;
+  const lines = ['## Done when', ''];
+
+  if (runtime === 'node') {
+    if (scripts.test) lines.push('- Tests pass (`npm test`)');
+    if (scripts.lint) lines.push('- Lint passes (`npm run lint`)');
+    if (scripts.typecheck || scripts['type-check']) lines.push('- Type check passes');
+  } else if (runtime === 'python') {
+    lines.push('- Tests pass (`pytest`)');
+    if (profile.stack.linter) lines.push(`- Lint passes (\`${profile.stack.linter} .\`)`);
+  } else if (runtime === 'go') {
+    lines.push('- Tests pass (`go test ./...`)');
+    lines.push('- Vet passes (`go vet ./...`)');
+  } else if (runtime === 'rust') {
+    lines.push('- Tests pass (`cargo test`)');
+    lines.push('- Clippy clean (`cargo clippy`)');
+  }
+
+  lines.push('- Change is the smallest safe diff');
+  lines.push('- No unintended side effects');
+  lines.push('- Documentation updated if public behavior changed');
 
   return lines.join('\n');
 }
@@ -254,6 +347,11 @@ exports.generate = function generate(profile) {
   if (envSection) sections.push(envSection);
 
   sections.push(buildConventionsSection(profile));
+
+  const securitySection = buildSecuritySection(profile);
+  if (securitySection) sections.push(securitySection);
+
+  sections.push(buildErrorHandlingSection(profile));
   sections.push(buildDoNotSection(profile));
   sections.push(buildDoneSection(profile));
 

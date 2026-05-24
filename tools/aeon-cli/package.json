@@ -1,6 +1,6 @@
 {
   "name": "aeon-cli",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Generate and analyze AGENTS.md files from any codebase",
   "bin": {
     "aeon": "./bin/aeon.js"

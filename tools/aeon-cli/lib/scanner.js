@@ -36,12 +36,65 @@ function getTopDirs(root) {
 
 function detectRuntime(root) {
   if (fileExists(root, 'package.json')) return 'node';
-  if (fileExists(root, 'pyproject.toml') || fileExists(root, 'requirements.txt')) return 'python';
+  if (fileExists(root, 'pyproject.toml') || fileExists(root, 'requirements.txt') || fileExists(root, 'setup.py')) return 'python';
   if (fileExists(root, 'go.mod')) return 'go';
   if (fileExists(root, 'Cargo.toml')) return 'rust';
   if (fileExists(root, 'Gemfile')) return 'ruby';
   if (fileExists(root, 'composer.json')) return 'php';
+  if (fileExists(root, 'pom.xml') || fileExists(root, 'build.gradle')) return 'java';
+  if (fileExists(root, 'mix.exs')) return 'elixir';
   return 'unknown';
+}
+
+function detectPythonStack(root) {
+  const stack = { framework: null, language: 'python', testFramework: null, linter: null, orm: null };
+  const reqs = readText(root, 'requirements.txt') || '';
+  const pyproject = readText(root, 'pyproject.toml') || '';
+  const all = reqs + '\n' + pyproject;
+
+  if (/\bdjango\b/i.test(all)) stack.framework = 'django';
+  else if (/\bflask\b/i.test(all)) stack.framework = 'flask';
+  else if (/\bfastapi\b/i.test(all)) stack.framework = 'fastapi';
+  else if (/\bstarlette\b/i.test(all)) stack.framework = 'starlette';
+
+  if (/\bpytest\b/i.test(all)) stack.testFramework = 'pytest';
+  else if (/\bunittest\b/i.test(all) || fileExists(root, 'tests')) stack.testFramework = 'unittest';
+
+  if (/\bruff\b/i.test(all)) stack.linter = 'ruff';
+  else if (/\bflake8\b/i.test(all)) stack.linter = 'flake8';
+  else if (/\bpylint\b/i.test(all)) stack.linter = 'pylint';
+  else if (/\bmypy\b/i.test(all)) stack.linter = 'mypy';
+
+  if (/\bsqlalchemy\b/i.test(all)) stack.orm = 'sqlalchemy';
+  else if (/\bdjango\b/i.test(all)) stack.orm = 'django-orm';
+  else if (/\btortoise\b/i.test(all)) stack.orm = 'tortoise';
+  else if (/\bpeewee\b/i.test(all)) stack.orm = 'peewee';
+
+  return stack;
+}
+
+function detectGoStack(root) {
+  const stack = { framework: null, language: 'go', testFramework: 'go-test' };
+  const gomod = readText(root, 'go.mod') || '';
+
+  if (/gin-gonic\/gin/i.test(gomod)) stack.framework = 'gin';
+  else if (/labstack\/echo/i.test(gomod)) stack.framework = 'echo';
+  else if (/gofiber\/fiber/i.test(gomod)) stack.framework = 'fiber';
+  else if (/gorilla\/mux/i.test(gomod)) stack.framework = 'gorilla';
+
+  return stack;
+}
+
+function detectRustStack(root) {
+  const stack = { framework: null, language: 'rust', testFramework: 'cargo-test' };
+  const cargo = readText(root, 'Cargo.toml') || '';
+
+  if (/actix-web/i.test(cargo)) stack.framework = 'actix';
+  else if (/\brocket\b/i.test(cargo)) stack.framework = 'rocket';
+  else if (/\baxum\b/i.test(cargo)) stack.framework = 'axum';
+  else if (/\bwarp\b/i.test(cargo)) stack.framework = 'warp';
+
+  return stack;
 }
 
 function detectNodeStack(pkg) {
@@ -154,7 +207,11 @@ exports.scan = function scan(root) {
     description: pkg?.description || null,
     runtime,
     scripts: pkg?.scripts || {},
-    stack: runtime === 'node' && pkg ? detectNodeStack(pkg) : {},
+    stack: runtime === 'node' && pkg ? detectNodeStack(pkg)
+         : runtime === 'python' ? detectPythonStack(root)
+         : runtime === 'go' ? detectGoStack(root)
+         : runtime === 'rust' ? detectRustStack(root)
+         : {},
     structure,
     configs,
     envVars,
