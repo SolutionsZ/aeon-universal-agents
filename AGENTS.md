@@ -994,6 +994,317 @@ Ship efficiently.
 
 ---
 
+# 14B. OBSERVABILITY LAW
+
+Production code must be debuggable after deployment.
+
+Do not add noisy logs.
+Add useful signals.
+
+```txt
+OBSERVABILITY CHECK
+Important event:
+Failure path:
+Request/job id:
+User/resource id where safe:
+Duration:
+Retry count:
+External service:
+Error category:
+Log level:
+Sensitive data risk:
+```
+
+Rules:
+
+- Log important state changes and failure paths.
+- Include correlation/request/job IDs where the stack supports it.
+- Log enough context to debug without exposing secrets or sensitive data.
+- Do not log passwords, tokens, API keys, session cookies, or full sensitive payloads.
+- Use clear event names, not random console messages.
+- Keep logs structured where practical.
+- Track duration for slow or external operations.
+- Do not hide errors behind generic messages in internal logs.
+- Keep user-facing errors safe and internal logs diagnostic.
+
+Output when relevant:
+
+```txt
+OBSERVABILITY
+Logs:
+Metrics:
+Trace/correlation:
+Sensitive data protected:
+Risk:
+```
+
+---
+
+# 14C. CONFIGURATION AND ENVIRONMENT LAW
+
+Configuration must be explicit, environment-safe, and documented.
+
+```txt
+CONFIG CHECK
+Environment variables:
+Defaults:
+Required values:
+Secrets:
+Local development:
+Production:
+Validation:
+Documentation:
+```
+
+Rules:
+
+- Do not hardcode secrets or environment-specific values.
+- Use environment variables or the repo's existing config system.
+- Validate required config at startup where practical.
+- Provide safe development defaults only when appropriate.
+- Do not silently fall back to unsafe production defaults.
+- Keep `.env.example` updated when environment variables change.
+- Document new config in README or relevant docs.
+- Never commit real `.env` files, tokens, credentials, or private keys.
+
+Output when relevant:
+
+```txt
+CONFIG
+Added:
+Changed:
+Required:
+Docs updated:
+Risk:
+```
+
+---
+
+# 14D. RELEASE AND COMPATIBILITY LAW
+
+Changes must be safe for existing users.
+
+```txt
+COMPATIBILITY CHECK
+Public API changed:
+CLI command changed:
+Config changed:
+Database changed:
+Output format changed:
+Behavior changed:
+Migration needed:
+Rollback possible:
+Docs updated:
+```
+
+Rules:
+
+- Do not break public APIs, CLI commands, output formats, or config names without explicit reason.
+- Prefer backward-compatible additions over breaking changes.
+- Version breaking changes clearly.
+- Provide migration notes when users must change behavior.
+- Keep old behavior working where practical.
+- Update changelog/release notes for user-visible changes.
+- State rollback risk for risky changes.
+
+Output when relevant:
+
+```txt
+COMPATIBILITY
+Breaking change:
+Migration:
+Rollback:
+Changelog:
+Risk:
+```
+
+---
+
+# 14E. DEPENDENCY AND SUPPLY-CHAIN LAW
+
+Dependencies are part of the attack surface.
+
+```txt
+SUPPLY-CHAIN CHECK
+New dependency:
+Existing alternative:
+Transitive dependencies:
+License:
+Maintenance:
+Security history:
+Install scripts:
+Runtime/build impact:
+Removal cost:
+```
+
+Rules:
+
+- Prefer zero dependency or existing dependency when practical.
+- Add new packages only when value clearly exceeds risk.
+- Check license compatibility.
+- Avoid abandoned or dependency-heavy packages.
+- Avoid packages with unnecessary install scripts for simple tasks.
+- Keep lockfiles consistent with the repo's package manager.
+- Do not mix package managers without explicit reason.
+- Document why a non-obvious dependency is added.
+- Do not update unrelated dependencies during feature/bug patches.
+
+Output when relevant:
+
+```txt
+DEPENDENCIES
+Added:
+Removed:
+Updated:
+Reason:
+Risk:
+```
+
+---
+
+# 14F. DATA LIFECYCLE LAW
+
+Data must have ownership, retention, backup, and deletion behavior.
+
+```txt
+DATA LIFECYCLE CHECK
+Owner:
+Retention:
+Deletion:
+Export:
+Backup:
+Restore:
+Sensitive fields:
+Audit needs:
+Legal/compliance risk:
+```
+
+Rules:
+
+- Know where data is stored and who owns it.
+- Do not store data longer than needed without reason.
+- Support deletion or anonymization where required.
+- Do not duplicate sensitive data unnecessarily.
+- Do not log sensitive data.
+- Consider backup/restore impact for persistence changes.
+- Consider audit trails for critical business actions.
+- Document data retention or deletion behavior when user-facing or compliance-relevant.
+
+Output when relevant:
+
+```txt
+DATA
+Stored:
+Sensitive:
+Retention:
+Deletion:
+Backup/restore:
+Risk:
+```
+
+---
+
+# 14G. ACCESSIBILITY AND INTERNATIONALIZATION LAW
+
+User-facing interfaces should be usable by more people and adaptable to language/locale.
+
+```txt
+ACCESSIBILITY CHECK
+Semantic markup:
+Labels:
+Keyboard navigation:
+Focus states:
+Contrast:
+Screen reader text:
+Error messages:
+Touch targets:
+Reduced motion:
+```
+
+Rules:
+
+- Use semantic markup where practical.
+- Label inputs and controls clearly.
+- Preserve keyboard navigation and visible focus states.
+- Do not rely on color alone to communicate meaning.
+- Keep error messages clear and close to the relevant field/action.
+- Respect reduced-motion preferences where animation is used.
+- Use readable contrast.
+- Make touch targets usable on mobile.
+
+```txt
+I18N CHECK
+Hardcoded user-facing text:
+Date/time format:
+Number/currency format:
+Timezone:
+Text expansion:
+RTL risk:
+```
+
+Rules:
+
+- Avoid scattering hardcoded user-facing text in complex apps.
+- Use locale-aware formatting for dates, times, numbers, and currency where relevant.
+- Treat timezone behavior explicitly.
+- Do not assume English-only if the product is multilingual or public-facing.
+- Allow UI room for translated text expansion.
+
+Output when relevant:
+
+```txt
+ACCESSIBILITY/I18N
+Accessibility:
+Locale/timezone:
+Text handling:
+Risk:
+```
+
+---
+
+# 14H. OPERATIONAL RESILIENCE LAW
+
+Systems should degrade safely under failure.
+
+```txt
+RESILIENCE CHECK
+External service failure:
+Network failure:
+Timeout:
+Retry:
+Fallback:
+Queue/backpressure:
+Partial failure:
+User message:
+Recovery:
+```
+
+Rules:
+
+- Set timeouts for external calls where the stack supports it.
+- Retry only transient failures.
+- Avoid infinite retries.
+- Use backoff for repeated transient failures.
+- Keep side effects idempotent before retrying.
+- Provide graceful failure messages to users.
+- Avoid blocking the entire system because one optional service failed.
+- Queue heavy work only when async pressure exists.
+- Document operational failure behavior when important.
+
+Output when relevant:
+
+```txt
+RESILIENCE
+Timeouts:
+Retries:
+Fallback:
+Idempotency:
+User impact:
+Risk:
+```
+
+---
+
 # 15. DATABASE / PERSISTENCE LAW
 
 Before changing persistence:
@@ -1573,6 +1884,13 @@ Avoid obvious waste — efficient queries, limited payloads, paginated data.
 Cache only with clear invalidation.
 Minify and optimize production builds.
 Measure before complex optimization.
+Make production behavior observable.
+Keep config explicit.
+Protect compatibility.
+Treat dependencies as risk.
+Respect data lifecycle.
+Keep UI accessible and locale-aware.
+Degrade safely.
 Apply KISS.
 Avoid magic.
 Avoid speculative architecture.
