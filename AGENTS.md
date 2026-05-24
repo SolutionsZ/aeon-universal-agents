@@ -781,6 +781,219 @@ Prefer:
 
 ---
 
+# 14A. PRODUCTION OPTIMIZATION LAW
+
+Build with production efficiency in mind from the start.
+
+Do not over-optimize prematurely, but never ship obvious waste.
+
+The goal is:
+
+```txt
+correct behavior
+minimal code
+efficient data access
+fast frontend
+safe caching
+clean build output
+predictable production behavior
+```
+
+## Backend Optimization
+
+Before implementing backend logic, check:
+
+```txt
+QUERY EFFICIENCY
+N+1 queries:
+Missing indexes:
+Unbounded result sets:
+Pagination:
+Filtering at database level:
+Selecting only needed fields:
+Batching:
+Transaction scope:
+Connection pooling:
+Caching:
+```
+
+Rules:
+
+- Do not fetch entire tables when a filtered query is enough.
+- Do not return unbounded lists from APIs.
+- Paginate, limit, or stream large datasets.
+- Filter at the database/query layer when possible.
+- Select only the fields needed by the caller.
+- Avoid N+1 query patterns.
+- Add indexes only for justified frequent filters, joins, or lookups.
+- Batch reads/writes where safe.
+- Keep transactions short.
+- Use connection pooling where the stack requires it.
+- Cache only when invalidation is clear.
+- Never cache sensitive data carelessly.
+
+## API Optimization
+
+Every API should avoid unnecessary work and unnecessary output.
+
+```txt
+API EFFICIENCY
+Input validated before expensive work:
+Response contains only needed data:
+Duplicate side effects prevented:
+Expensive work async when needed:
+Rate limits for public/expensive endpoints:
+HTTP caching considered where safe:
+Idempotency for retryable writes:
+```
+
+Rules:
+
+- Validate input before expensive operations.
+- Do not return data the caller does not need.
+- Avoid duplicate side effects.
+- Make expensive operations asynchronous when needed.
+- Rate-limit public or expensive endpoints.
+- Use HTTP caching where safe and correct.
+- Use idempotency for retryable writes.
+
+## Frontend Optimization
+
+Frontend must be fast by default, especially on mobile.
+
+```txt
+FRONTEND EFFICIENCY
+Production minification:
+Asset size:
+Image optimization:
+Lazy loading:
+Render cost:
+Repeated DOM work:
+Layout shifts:
+Unused code:
+Network requests:
+Mobile performance:
+```
+
+Rules:
+
+- Minify production assets where the stack supports it.
+- Compress and resize images.
+- Lazy-load heavy assets where useful.
+- Avoid unnecessary JavaScript.
+- Avoid repeated DOM/render work.
+- Avoid unnecessary re-renders.
+- Avoid layout shifts where possible.
+- Reduce network requests where practical.
+- Do not ship development-only code to production.
+- Treat mobile performance as a first-class requirement.
+
+## Build and Deployment Optimization
+
+Production builds must be intentional.
+
+```txt
+BUILD OUTPUT
+Production mode:
+Minified assets:
+Dead code removed:
+Source maps policy:
+Compression:
+Environment config:
+Logging level:
+Secrets:
+Health checks:
+```
+
+Rules:
+
+- Use production mode for production builds.
+- Keep source maps intentional.
+- Do not expose secrets in built assets.
+- Enable gzip/brotli where the platform supports it.
+- Keep logs useful but not noisy.
+- Add health checks for services where relevant.
+- Document production build and deployment commands.
+- Keep environment-specific config outside source code.
+
+## Caching Discipline
+
+Caching is useful only when invalidation is understood.
+
+```txt
+CACHE CHECK
+What is cached:
+Why:
+Where:
+TTL:
+Invalidation:
+Sensitive data risk:
+Stale data risk:
+Fallback:
+```
+
+Rules:
+
+- Do not add caching without an invalidation strategy.
+- Do not cache user-sensitive data unless safe and necessary.
+- Use short TTLs when correctness matters.
+- Prefer simple caching before distributed caching.
+- Document cache behavior when it affects users or developers.
+
+## Optimization Discipline
+
+Do not guess blindly.
+
+```txt
+MEASURE
+What is slow:
+Where:
+Evidence:
+Expected improvement:
+Risk:
+```
+
+Rules:
+
+- Fix obvious waste immediately.
+- Measure before complex optimization.
+- Do not add queues unless async pressure exists.
+- Do not add infrastructure before the app needs it.
+- Keep optimization simple and explainable.
+- Prefer reducing work over adding more systems.
+
+## Production Optimization Output
+
+When optimization is relevant, include:
+
+```txt
+OPTIMIZATION
+Backend:
+API:
+Frontend:
+Build:
+Caching:
+Measured / Not measured:
+Risk:
+```
+
+## Final Optimization Command
+
+```txt
+Avoid obvious waste.
+Use efficient queries.
+Limit payloads.
+Paginate large data.
+Minify production assets.
+Optimize mobile performance.
+Cache only with invalidation.
+Measure before complex optimization.
+Keep it simple.
+Ship efficiently.
+```
+
+---
+
 # 15. DATABASE / PERSISTENCE LAW
 
 Before changing persistence:
@@ -1356,6 +1569,10 @@ Re-read before editing. Re-read after editing.
 Every changed line traces to the request.
 Keep frontend mobile-first, clean, optimized, professional, and user-friendly.
 Design is part of building — the coder is the designer.
+Avoid obvious waste — efficient queries, limited payloads, paginated data.
+Cache only with clear invalidation.
+Minify and optimize production builds.
+Measure before complex optimization.
 Apply KISS.
 Avoid magic.
 Avoid speculative architecture.
