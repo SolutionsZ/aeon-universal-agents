@@ -1305,6 +1305,202 @@ Risk:
 
 ---
 
+# 14I. THREAT MODELING LAW
+
+Before changing auth, public endpoints, file handling, payments, user data, admin tools, external integrations, or automation, identify abuse paths.
+
+Security asks: "Is this safe?"
+Threat modeling asks: "How will this be attacked?"
+
+```txt
+THREAT MODEL
+Asset:
+Actor:
+Entry point:
+Trust boundary:
+Abuse case:
+Impact:
+Mitigation:
+Residual risk:
+```
+
+Rules:
+
+- Think like a malicious user, not only a normal user.
+- Identify trust boundaries before accepting input.
+- Treat public endpoints as hostile.
+- Treat uploaded files as hostile.
+- Treat external webhooks as untrusted until verified.
+- Treat automation as dangerous when it can modify data.
+- Do not add powerful actions without permission checks, auditability, and rollback thinking.
+- Consider rate abuse, privilege escalation, data exfiltration, and denial of service.
+- Document residual risk when full mitigation is not practical.
+
+Output when relevant:
+
+```txt
+THREAT
+Asset:
+Abuse case:
+Mitigation:
+Residual risk:
+```
+
+---
+
+# 14J. CONCURRENCY AND CONSISTENCY LAW
+
+When multiple users, jobs, requests, or processes can touch the same data, define consistency behavior.
+
+```txt
+CONCURRENCY CHECK
+Shared resource:
+Concurrent writers:
+Race condition:
+Lock needed:
+Transaction needed:
+Idempotency:
+Conflict behavior:
+Retry behavior:
+```
+
+Rules:
+
+- Do not assume single-user behavior in multi-user systems.
+- Protect critical writes with transactions, locks, constraints, or idempotency keys where needed.
+- Prevent duplicate processing for jobs and webhooks.
+- Define what happens when two users edit the same resource.
+- Prefer database constraints over application-only assumptions for critical uniqueness.
+- Use optimistic locking or versioning where full locks are too expensive.
+- Keep critical sections short.
+- Document conflict resolution behavior when it affects users.
+
+Output when relevant:
+
+```txt
+CONCURRENCY
+Shared resource:
+Protection:
+Conflict behavior:
+Risk:
+```
+
+---
+
+# 14K. TIME AND DATE LAW
+
+Time logic must be explicit.
+
+```txt
+TIME CHECK
+Timezone:
+Storage format:
+Display format:
+Date-only vs datetime:
+DST risk:
+Locale:
+Server/client source:
+Comparison method:
+```
+
+Rules:
+
+- Store timestamps in a consistent timezone, usually UTC unless the domain requires otherwise.
+- Treat date-only values differently from datetime values.
+- Do not compare formatted display strings unless the format is intentionally sortable.
+- Handle DST and timezone boundaries when scheduling, billing, deadlines, or calendars are involved.
+- Keep display formatting separate from storage format.
+- Document timezone assumptions when user-visible.
+- Use a date library when timezone math or locale formatting is complex.
+- Do not silently mix server time and client time.
+
+Output when relevant:
+
+```txt
+TIME
+Timezone:
+Storage:
+Display:
+DST/locale risk:
+```
+
+---
+
+# 14L. HUMAN REVIEW LAW
+
+Some changes require human approval even if the code is technically correct.
+
+Require review for:
+- auth/security changes
+- schema migrations
+- destructive deletes
+- payment/billing logic
+- legal/compliance text
+- production deployment config
+- dependency changes in critical paths
+- public API breaking changes
+- data retention/deletion behavior
+
+```txt
+HUMAN REVIEW
+Required: yes/no
+Reason:
+Risk:
+Approval needed before:
+```
+
+Rules:
+
+- Do not deploy security-sensitive changes without review.
+- Do not run destructive migrations without approval.
+- Do not change billing or payment logic without review.
+- Do not modify legal/compliance text without approval.
+- State when human review is recommended, even if not blocking.
+- When in doubt, flag for review rather than proceed silently.
+
+---
+
+# 14M. DEVELOPER EXPERIENCE LAW
+
+Code should be easy for the next developer to run, test, debug, and modify.
+
+```txt
+DX CHECK
+Setup clear:
+Run command clear:
+Test command clear:
+Errors actionable:
+File names clear:
+Folder structure clear:
+Examples present:
+Debug path clear:
+```
+
+Rules:
+
+- Prefer obvious names over clever names.
+- Make setup errors actionable.
+- Keep commands documented.
+- Add examples for non-obvious usage.
+- Do not hide important behavior behind magic.
+- Optimize for the next maintainer.
+- Keep file and folder names consistent with their role.
+- Keep entrypoints obvious.
+- If a developer cannot run the project in under 5 minutes with the README, the docs are incomplete.
+
+Output when relevant:
+
+```txt
+DX
+Setup:
+Commands:
+Naming:
+Debug path:
+Risk:
+```
+
+---
+
 # 15. DATABASE / PERSISTENCE LAW
 
 Before changing persistence:
@@ -1891,6 +2087,11 @@ Treat dependencies as risk.
 Respect data lifecycle.
 Keep UI accessible and locale-aware.
 Degrade safely.
+Model threats — think like an attacker, not just a builder.
+Define concurrency behavior for shared resources.
+Handle time and timezone explicitly.
+Flag changes that need human review.
+Optimize for the next maintainer.
 Apply KISS.
 Avoid magic.
 Avoid speculative architecture.
