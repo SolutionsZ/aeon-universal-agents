@@ -1,10 +1,18 @@
 # AEON Universal Agents
 
-**A universal `AGENTS.md` instruction file for coding agents.**
+**A universal `AGENTS.md` instruction standard plus a CLI for generating, scanning, and linting agent instruction files.**
 
 AEON Universal Agents is a practical, stack-neutral instruction file designed to make AI coding agents more objective, realistic, structured, and useful inside real software projects.
 
 It tells an agent how to inspect a repository, respect existing documentation, avoid hallucinations, keep MVC responsibilities clean, build from scratch when needed, patch existing code safely, use the smallest safe amount of code, document changes, and test honestly.
+
+This repository includes:
+
+- `AEON_UNIVERSAL_AGENTS.md` — the versioned canonical source (v9.0)
+- `AGENTS.md` — the file you copy into your own repo
+- `examples/` — scoped variants (minimal, frontend, backend, repo-template)
+- `tools/aeon-cli/` — CLI to generate, scan, and lint AGENTS.md files
+- `docs/` — step-by-step install guide for every major coding agent
 
 This repository is for developers who want AI agents to behave less like chatbots and more like disciplined engineering assistants.
 
@@ -47,28 +55,35 @@ Ship.
 
 ## What this file is
 
-This repository contains a universal agent instruction file:
+This repository contains a universal agent instruction standard.
 
-```txt
-AEON_UNIVERSAL_AGENTS.md
+The canonical source file is `AEON_UNIVERSAL_AGENTS.md`. Copy it into your project as:
+
+| Tool | Filename |
+|------|----------|
+| Universal / default | `AGENTS.md` |
+| Claude Code | `CLAUDE.md` |
+| GitHub Copilot | `.github/copilot-instructions.md` |
+| Cursor | `.cursor/rules/aeon.mdc` |
+
+The recommended default is `AGENTS.md` — a growing convention for giving coding agents project-specific instructions.
+
+## CLI tool
+
+The `tools/aeon-cli/` directory contains a Node.js CLI for working with AGENTS.md files:
+
+```bash
+# Generate a new AGENTS.md for your project
+npx aeon-cli init
+
+# Scan your repo and suggest improvements
+npx aeon-cli scan
+
+# Lint an existing AGENTS.md for issues
+npx aeon-cli lint
 ```
 
-You can use it as:
-
-```txt
-AGENTS.md
-CLAUDE.md
-.github/copilot-instructions.md
-.cursor/rules/aeon.mdc
-```
-
-The recommended default name is:
-
-```txt
-AGENTS.md
-```
-
-`AGENTS.md` is becoming a common convention for giving coding agents project-specific instructions.
+See `tools/aeon-cli/` for full documentation.
 
 ---
 
@@ -340,38 +355,29 @@ Recommended:
 
 After adding AEON to a repo, customize it with project-specific facts.
 
-For example:
+Add a section to your `AGENTS.md` with repo-specific instructions:
 
-```md
-# Project-specific additions
-
-## Setup
+**Setup and commands:**
 
 ```bash
 npm install
 npm run dev
-```
-
-## Test
-
-```bash
 npm test
 npm run lint
 ```
 
-## Architecture
+**Architecture notes:**
 
 - API routes are in `src/routes`.
 - Business logic is in `src/services`.
 - Database access is in `src/db`.
 - UI components are in `src/components`.
 
-## Do not
+**Do-not rules:**
 
 - Do not add new dependencies without approval.
 - Do not change public API response shapes without updating docs.
 - Do not claim tests passed unless they were run.
-```
 
 AEON is the universal base.
 Your repo-specific notes should override it.
@@ -488,7 +494,7 @@ This repository uses simple document versioning.
 Current version:
 
 ```txt
-v8
+v9
 ```
 
 Recommended stable filename:
@@ -507,15 +513,7 @@ AEON_UNIVERSAL_AGENTS.md
 
 ## License
 
-Choose a license before publishing.
-
-Recommended options:
-
-- **MIT** if you want maximum reuse.
-- **CC0** if you want to make it public domain-like.
-- **Apache-2.0** if you want patent protection language.
-
-For maximum developer adoption, MIT is a strong default.
+MIT. See `LICENSE`.
 
 ---
 

@@ -1,6 +1,9 @@
 # AEON UNIVERSAL AGENTS.md
+
 Version: 9.0
+
 Scope: universal, stack-neutral, core-code-first, objective, anti-hallucination.
+
 Purpose: guide any coding agent to inspect existing repo truth first, understand, structure, build, patch, document, test, and review software with minimal safe code, clean MVC separation, professional mobile-first frontend practices, and design discipline.
 
 ---
@@ -383,7 +386,7 @@ Build order:
 5. validation
 6. service logic
 7. interface/controller
-8. persistence adapter if needed (right-size DB; Sequelize migrations for Node.js SQL)
+8. persistence adapter if needed
 9. tests or manual verification
 10. limits / next steps
 ```
@@ -427,7 +430,7 @@ Use a library when it is clearly beneficial:
 - cryptography
 - date/time/timezone complexity
 - database drivers
-- ORM and migrations (Sequelize for Node.js SQL projects)
+- ORM and migrations
 - official provider SDKs
 - PDF/image/media processing
 - schema validation
@@ -801,48 +804,29 @@ Rules:
 
 ## Database choice — right-size persistence
 
-Choose the smallest database that safely meets the objective:
+Choose the smallest database that safely meets the objective.
 
 ```txt
-SQLite
-- small websites and landing pages with light data needs
-- solo tools, scripts, CLI utilities
-- local-first apps, prototypes, vertical slices
-- single-user or very low write concurrency
-- zero-ops deployment (one file, no database server)
-
-PostgreSQL
-- multi-user production apps
-- concurrent writes, complex relations, reporting
-- teams, staging/production environments
-- when the project already uses PostgreSQL
+embedded / file-based DB  — solo tools, prototypes, local-first, low concurrency
+server database           — multi-user, concurrent writes, teams, production
+managed / cloud database  — scale, ops delegation, multi-region
 ```
 
 Rules:
-- do not use PostgreSQL when SQLite is enough
-- do not use SQLite when concurrency, scale, or team workflow requires a server database
-- match the database already in the repo
+- do not use a server database when an embedded database is enough
+- do not use an embedded database when concurrency, scale, or team workflow requires a server
+- match the database already in the repo — do not switch without explicit reason
 - state the choice in BUILD/ASSUMPTIONS for greenfield work
 
-## Migrations and models — Sequelize (Node.js SQL)
+## Migrations and models
 
-When the project uses Node.js with a SQL database, use Sequelize for models and migrations unless the repo already uses another ORM.
-
-```txt
-SEQUELIZE CHECK
-Models in models/ (or project convention)?
-Migration created for every schema change?
-Migration applied before claiming DB work is done?
-Seeds only when the project already uses seeds?
-Existing Sequelize config and dialect respected?
-```
+For projects with a SQL database, prefer a structured ORM or migration workflow unless the repo already uses another convention.
 
 Rules:
-- do not invent ad-hoc raw SQL migration files when the project uses Sequelize
 - do not change schema without a migration
-- keep models in the model layer — no SQL in controllers or views
-- for new Node.js + SQL greenfield work, default to Sequelize unless the repo dictates otherwise
-- use SQLite or PostgreSQL as the Sequelize dialect based on project size (see above)
+- do not invent ad-hoc migration files when the project already uses an ORM or migration tool
+- keep models in the model layer — no raw queries in controllers or views
+- if the repo already uses a specific ORM, migration tool, or database convention, follow it
 
 ---
 
