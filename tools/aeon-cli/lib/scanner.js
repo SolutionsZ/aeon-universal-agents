@@ -6,8 +6,19 @@ const path = require('path');
 const IGNORE_DIRS = new Set([
   'node_modules', '.git', '.next', '.nuxt', 'dist', 'build', 'out',
   'coverage', '__pycache__', '.venv', 'venv', 'vendor', 'target',
-  '.cache', '.turbo', '.vercel', '.svelte-kit',
+  '.cache', '.turbo', '.vercel', '.svelte-kit', 'bower_components',
 ]);
+
+const RUNTIME_FILES = [
+  ['package.json', 'node'],
+  ['pyproject.toml', 'python'], ['requirements.txt', 'python'], ['setup.py', 'python'],
+  ['go.mod', 'go'],
+  ['Cargo.toml', 'rust'],
+  ['Gemfile', 'ruby'],
+  ['composer.json', 'php'],
+  ['pom.xml', 'java'], ['build.gradle', 'java'],
+  ['mix.exs', 'elixir'],
+];
 
 function fileExists(root, ...parts) {
   return fs.existsSync(path.join(root, ...parts));
@@ -35,66 +46,10 @@ function getTopDirs(root) {
 }
 
 function detectRuntime(root) {
-  if (fileExists(root, 'package.json')) return 'node';
-  if (fileExists(root, 'pyproject.toml') || fileExists(root, 'requirements.txt') || fileExists(root, 'setup.py')) return 'python';
-  if (fileExists(root, 'go.mod')) return 'go';
-  if (fileExists(root, 'Cargo.toml')) return 'rust';
-  if (fileExists(root, 'Gemfile')) return 'ruby';
-  if (fileExists(root, 'composer.json')) return 'php';
-  if (fileExists(root, 'pom.xml') || fileExists(root, 'build.gradle')) return 'java';
-  if (fileExists(root, 'mix.exs')) return 'elixir';
+  for (const [file, runtime] of RUNTIME_FILES) {
+    if (fileExists(root, file)) return runtime;
+  }
   return 'unknown';
-}
-
-function detectPythonStack(root) {
-  const stack = { framework: null, language: 'python', testFramework: null, linter: null, orm: null };
-  const reqs = readText(root, 'requirements.txt') || '';
-  const pyproject = readText(root, 'pyproject.toml') || '';
-  const all = reqs + '\n' + pyproject;
-
-  if (/\bdjango\b/i.test(all)) stack.framework = 'django';
-  else if (/\bflask\b/i.test(all)) stack.framework = 'flask';
-  else if (/\bfastapi\b/i.test(all)) stack.framework = 'fastapi';
-  else if (/\bstarlette\b/i.test(all)) stack.framework = 'starlette';
-
-  if (/\bpytest\b/i.test(all)) stack.testFramework = 'pytest';
-  else if (/\bunittest\b/i.test(all) || fileExists(root, 'tests')) stack.testFramework = 'unittest';
-
-  if (/\bruff\b/i.test(all)) stack.linter = 'ruff';
-  else if (/\bflake8\b/i.test(all)) stack.linter = 'flake8';
-  else if (/\bpylint\b/i.test(all)) stack.linter = 'pylint';
-  else if (/\bmypy\b/i.test(all)) stack.linter = 'mypy';
-
-  if (/\bsqlalchemy\b/i.test(all)) stack.orm = 'sqlalchemy';
-  else if (/\bdjango\b/i.test(all)) stack.orm = 'django-orm';
-  else if (/\btortoise\b/i.test(all)) stack.orm = 'tortoise';
-  else if (/\bpeewee\b/i.test(all)) stack.orm = 'peewee';
-
-  return stack;
-}
-
-function detectGoStack(root) {
-  const stack = { framework: null, language: 'go', testFramework: 'go-test' };
-  const gomod = readText(root, 'go.mod') || '';
-
-  if (/gin-gonic\/gin/i.test(gomod)) stack.framework = 'gin';
-  else if (/labstack\/echo/i.test(gomod)) stack.framework = 'echo';
-  else if (/gofiber\/fiber/i.test(gomod)) stack.framework = 'fiber';
-  else if (/gorilla\/mux/i.test(gomod)) stack.framework = 'gorilla';
-
-  return stack;
-}
-
-function detectRustStack(root) {
-  const stack = { framework: null, language: 'rust', testFramework: 'cargo-test' };
-  const cargo = readText(root, 'Cargo.toml') || '';
-
-  if (/actix-web/i.test(cargo)) stack.framework = 'actix';
-  else if (/\brocket\b/i.test(cargo)) stack.framework = 'rocket';
-  else if (/\baxum\b/i.test(cargo)) stack.framework = 'axum';
-  else if (/\bwarp\b/i.test(cargo)) stack.framework = 'warp';
-
-  return stack;
 }
 
 function detectNodeStack(pkg) {
@@ -105,67 +60,126 @@ function detectNodeStack(pkg) {
 
   if (has('typescript') || has('ts-node')) stack.language = 'typescript';
 
-  if (has('next')) stack.framework = 'next';
-  else if (has('nuxt')) stack.framework = 'nuxt';
-  else if (has('express')) stack.framework = 'express';
-  else if (has('fastify')) stack.framework = 'fastify';
-  else if (has('hono')) stack.framework = 'hono';
-  else if (has('koa')) stack.framework = 'koa';
-  else if (has('react')) stack.framework = 'react';
-  else if (has('vue')) stack.framework = 'vue';
-  else if (has('svelte')) stack.framework = 'svelte';
-  else if (has('angular')) stack.framework = 'angular';
+  const frameworks = [
+    ['next', 'next'], ['nuxt', 'nuxt'], ['express', 'express'], ['fastify', 'fastify'],
+    ['hono', 'hono'], ['koa', 'koa'], ['react', 'react'], ['vue', 'vue'],
+    ['svelte', 'svelte'], ['@angular/core', 'angular'], ['angular', 'angular'],
+    ['ionic', 'ionic'], ['electron', 'electron'],
+  ];
+  for (const [dep, name] of frameworks) { if (has(dep)) { stack.framework = name; break; } }
 
   if (has('tailwindcss')) stack.css = 'tailwind';
   else if (has('sass') || has('node-sass')) stack.css = 'sass';
   else if (has('styled-components')) stack.css = 'styled-components';
 
-  if (has('sequelize')) stack.orm = 'sequelize';
-  else if (has('prisma') || has('@prisma/client')) stack.orm = 'prisma';
-  else if (has('typeorm')) stack.orm = 'typeorm';
-  else if (has('drizzle-orm')) stack.orm = 'drizzle';
-  else if (has('mongoose')) stack.orm = 'mongoose';
-  else if (has('knex')) stack.orm = 'knex';
+  const orms = [
+    ['sequelize', 'sequelize'], ['@prisma/client', 'prisma'], ['prisma', 'prisma'],
+    ['typeorm', 'typeorm'], ['drizzle-orm', 'drizzle'], ['mongoose', 'mongoose'], ['knex', 'knex'],
+  ];
+  for (const [dep, name] of orms) { if (has(dep)) { stack.orm = name; break; } }
 
-  if (has('jest')) stack.testFramework = 'jest';
-  else if (has('vitest')) stack.testFramework = 'vitest';
-  else if (has('mocha')) stack.testFramework = 'mocha';
-  else if (has('ava')) stack.testFramework = 'ava';
-  else if (has('tap')) stack.testFramework = 'tap';
+  const tests = [
+    ['jest', 'jest'], ['vitest', 'vitest'], ['mocha', 'mocha'], ['ava', 'ava'], ['tap', 'tap'],
+  ];
+  for (const [dep, name] of tests) { if (has(dep)) { stack.testFramework = name; break; } }
 
   if (has('eslint')) stack.linter = 'eslint';
   else if (has('@biomejs/biome') || has('biome')) stack.linter = 'biome';
 
-  if (has('vite')) stack.bundler = 'vite';
-  else if (has('webpack')) stack.bundler = 'webpack';
-  else if (has('esbuild')) stack.bundler = 'esbuild';
-  else if (has('rollup')) stack.bundler = 'rollup';
+  const bundlers = [['vite', 'vite'], ['webpack', 'webpack'], ['esbuild', 'esbuild'], ['rollup', 'rollup'], ['gulp', 'gulp']];
+  for (const [dep, name] of bundlers) { if (has(dep)) { stack.bundler = name; break; } }
 
+  return stack;
+}
+
+function detectPythonStack(root) {
+  const stack = { framework: null, language: 'python', testFramework: null, linter: null, orm: null };
+  const all = (readText(root, 'requirements.txt') || '') + '\n' + (readText(root, 'pyproject.toml') || '');
+
+  const match = (pat) => pat.test(all);
+  if (match(/\bdjango\b/i)) stack.framework = 'django';
+  else if (match(/\bflask\b/i)) stack.framework = 'flask';
+  else if (match(/\bfastapi\b/i)) stack.framework = 'fastapi';
+
+  if (match(/\bpytest\b/i)) stack.testFramework = 'pytest';
+  if (match(/\bruff\b/i)) stack.linter = 'ruff';
+  else if (match(/\bflake8\b/i)) stack.linter = 'flake8';
+  else if (match(/\bmypy\b/i)) stack.linter = 'mypy';
+
+  if (match(/\bsqlalchemy\b/i)) stack.orm = 'sqlalchemy';
+  else if (match(/\bdjango\b/i)) stack.orm = 'django-orm';
+  return stack;
+}
+
+function detectGoStack(root) {
+  const stack = { framework: null, language: 'go', testFramework: 'go-test' };
+  const gomod = readText(root, 'go.mod') || '';
+  if (/gin-gonic\/gin/.test(gomod)) stack.framework = 'gin';
+  else if (/labstack\/echo/.test(gomod)) stack.framework = 'echo';
+  else if (/gofiber\/fiber/.test(gomod)) stack.framework = 'fiber';
+  return stack;
+}
+
+function detectRustStack(root) {
+  const stack = { framework: null, language: 'rust', testFramework: 'cargo-test' };
+  const cargo = readText(root, 'Cargo.toml') || '';
+  if (/actix-web/.test(cargo)) stack.framework = 'actix';
+  else if (/\baxum\b/.test(cargo)) stack.framework = 'axum';
+  else if (/\brocket\b/.test(cargo)) stack.framework = 'rocket';
   return stack;
 }
 
 function detectStructure(root) {
   const dirs = getTopDirs(root);
+  const check = (patterns) => dirs.some(d => patterns.some(p => p instanceof RegExp ? p.test(d) : d === p));
+
   const result = {
     dirs,
-    hasModels: dirs.some(d => /^models?$/i.test(d)),
-    hasControllers: dirs.some(d => /^controllers?$/i.test(d)),
-    hasViews: dirs.some(d => /^views?$/i.test(d)),
-    hasRoutes: dirs.some(d => /^routes?$/i.test(d)),
-    hasServices: dirs.some(d => /^services?$/i.test(d)),
-    hasMiddleware: dirs.some(d => /^middleware$/i.test(d)),
-    hasSrc: dirs.includes('src'),
-    hasLib: dirs.includes('lib'),
-    hasTests: dirs.some(d => /^(tests?|__tests__|spec)$/i.test(d)),
-    hasPublic: dirs.some(d => /^(public|static|assets)$/i.test(d)),
-    hasConfig: dirs.some(d => /^config$/i.test(d)),
-    hasDocs: dirs.includes('docs'),
-    hasDocker: fileExists(root, 'Dockerfile') || fileExists(root, 'docker-compose.yml') || fileExists(root, 'docker-compose.yaml'),
+    hasModels: check([/^models?$/i]),
+    hasControllers: check([/^controllers?$/i]),
+    hasViews: check([/^views?$/i]),
+    hasRoutes: check([/^routes?$/i, /^endpoints?$/i]),
+    hasServices: check([/^services?$/i]),
+    hasMiddleware: check([/^middleware$/i]),
+    hasSrc: check(['src']),
+    hasLib: check(['lib']),
+    hasTests: check([/^(tests?|__tests__|spec|e2e-tests?|unit-tests?)$/i]),
+    hasPublic: check([/^(public|static|assets|www)$/i]),
+    hasConfig: check([/^config$/i]),
+    hasDocs: check([/^(docs|documentation)$/i]),
+    hasScripts: check([/^scripts$/i]),
+    hasWorkers: check([/^(workers?|jobs?|cronjobs?)$/i]),
+    hasDocker: fileExists(root, 'Dockerfile') || fileExists(root, 'docker-compose.yml') || fileExists(root, 'docker-compose.yaml') || fileExists(root, 'compose.yml'),
     hasCI: fileExists(root, '.github', 'workflows') || fileExists(root, '.gitlab-ci.yml') || fileExists(root, 'Jenkinsfile'),
+    hasSetupScript: fileExists(root, 'setup.sh') || fileExists(root, 'install.sh'),
     isMVC: false,
+    packages: [],
   };
   result.isMVC = result.hasModels && (result.hasControllers || result.hasRoutes) && result.hasViews;
   return result;
+}
+
+function detectPackages(root, dirs) {
+  const packages = [];
+  for (const dir of dirs) {
+    if (IGNORE_DIRS.has(dir)) continue;
+    const sub = path.join(root, dir);
+    for (const [file, runtime] of RUNTIME_FILES) {
+      if (fileExists(sub, file)) {
+        const pkg = runtime === 'node' ? readJSON(sub, 'package.json') : null;
+        const stack = runtime === 'node' && pkg ? detectNodeStack(pkg) : {};
+        packages.push({
+          name: pkg?.name || dir,
+          dir,
+          runtime,
+          framework: stack.framework || null,
+          scripts: pkg?.scripts ? Object.keys(pkg.scripts) : [],
+        });
+        break;
+      }
+    }
+  }
+  return packages;
 }
 
 function detectEnvVars(root) {
@@ -175,6 +189,29 @@ function detectEnvVars(root) {
     .map(l => l.trim())
     .filter(l => l && !l.startsWith('#') && l.includes('='))
     .map(l => l.split('=')[0].trim());
+}
+
+function extractReadmeCommands(root) {
+  const readme = readText(root, 'README.md') || readText(root, 'readme.md') || readText(root, 'SETUP_GUIDE.md') || '';
+  if (!readme) return {};
+
+  const commands = { setup: [], run: [], test: [] };
+  const blocks = readme.matchAll(/```(?:bash|sh|shell)?\n([\s\S]*?)```/g);
+
+  for (const m of blocks) {
+    const lines = m[1].split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
+    for (const line of lines) {
+      if (/npm install|pip install|yarn|pnpm install|cargo build|go mod|bundle install|composer install/.test(line)) {
+        commands.setup.push(line);
+      } else if (/npm run dev|npm start|flask run|python manage|go run|cargo run|rails s|node /.test(line)) {
+        commands.run.push(line);
+      } else if (/npm test|pytest|go test|cargo test|jest|vitest|rspec/.test(line)) {
+        commands.test.push(line);
+      }
+    }
+  }
+
+  return commands;
 }
 
 function detectConfigs(root) {
@@ -200,22 +237,33 @@ exports.scan = function scan(root) {
   const structure = detectStructure(root);
   const configs = detectConfigs(root);
   const envVars = detectEnvVars(root);
+  const readmeCommands = extractReadmeCommands(root);
 
-  const profile = {
+  const packages = detectPackages(root, structure.dirs);
+  structure.packages = packages;
+
+  let stack = {};
+  if (runtime === 'node' && pkg) stack = detectNodeStack(pkg);
+  else if (runtime === 'python') stack = detectPythonStack(root);
+  else if (runtime === 'go') stack = detectGoStack(root);
+  else if (runtime === 'rust') stack = detectRustStack(root);
+  else if (runtime === 'unknown' && packages.length > 0) {
+    const primary = packages[0];
+    stack = { framework: primary.framework, language: primary.runtime };
+  }
+
+  return {
     root,
     name: pkg?.name || path.basename(root),
     description: pkg?.description || null,
-    runtime,
+    runtime: runtime === 'unknown' && packages.length > 0 ? packages[0].runtime : runtime,
+    isMonorepo: packages.length > 1 || (runtime === 'unknown' && packages.length > 0),
     scripts: pkg?.scripts || {},
-    stack: runtime === 'node' && pkg ? detectNodeStack(pkg)
-         : runtime === 'python' ? detectPythonStack(root)
-         : runtime === 'go' ? detectGoStack(root)
-         : runtime === 'rust' ? detectRustStack(root)
-         : {},
+    stack,
     structure,
     configs,
     envVars,
+    readmeCommands,
+    packages,
   };
-
-  return profile;
 };
