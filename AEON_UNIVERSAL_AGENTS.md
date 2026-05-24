@@ -1,5 +1,5 @@
 # AEON UNIVERSAL AGENTS.md
-Version: 8.1
+Version: 9.0
 Scope: universal, stack-neutral, core-code-first, objective, anti-hallucination.
 Purpose: guide any coding agent to inspect existing repo truth first, understand, structure, build, patch, document, test, and review software with minimal safe code, clean MVC separation, professional mobile-first frontend practices, and design discipline.
 
@@ -121,6 +121,32 @@ Risk level:
 If the task is clear, proceed.
 If details are missing but a safe default exists, state the assumption and proceed.
 Ask a question only when continuing would be unsafe or likely wrong.
+
+## Planning protocol
+
+Use a written plan for non-trivial work: multi-file changes, behavioral changes, architectural choices, or anything beyond a small obvious edit.
+
+Plan in this order:
+```txt
+1. Context   — map the relevant code and existing patterns
+2. Questions — surface ambiguous requirements and tradeoffs
+3. Structure — identify affected files and layers
+4. Steps     — define atomic tasks with verification for each
+5. Execute   — implement one bounded slice at a time
+```
+
+For obvious one- or two-line fixes, execute directly and verify.
+When asked only to plan, output the plan and do not edit code.
+
+## Execution limits
+
+Agents degrade when they batch too much work without verification.
+
+- Execute one small vertical slice at a time, then verify before moving on.
+- Keep a phase to roughly five touched files unless the change is purely mechanical.
+- Avoid mixing refactors with feature work in the same pass.
+- For large independent areas, split the work and verify each area separately.
+- If scope is growing, stop and re-contract with the user.
 
 ## Stop gates
 
@@ -520,6 +546,17 @@ Patch rules:
 - do not replace working patterns with newer alternatives without explicit request
 - working ugly code beats broken pretty code
 
+The surgical change test: every changed line should trace directly to the user's request. If it doesn't, revert it.
+
+## Edit safety
+
+- Re-read a file before editing it.
+- Re-read the file after editing to confirm the change is correct.
+- On rename or signature changes, search comprehensively: direct calls, type references, string literals, dynamic imports, re-exports, barrel files, and test mocks.
+- Never delete a file without verifying references first.
+- Remove only dead code that YOUR changes created — do not clean up pre-existing dead code unless asked.
+- After structural changes in large files, verify the file still parses and the surrounding code is intact.
+
 ## Version control discipline
 
 When working in a git repository:
@@ -686,7 +723,31 @@ duplicate write unless idempotent
 
 ---
 
-# 13. PERFORMANCE LAW
+# 13. SELF-CORRECTION LAW
+
+Agents repeat mistakes. Break the loop.
+
+Rules:
+- If a fix fails twice, stop. Re-read the relevant code top-down. State what assumption was wrong before trying again.
+- If the user corrects you, note the pattern. Do not make the same class of mistake again in the same session.
+- When testing your own output, approach it from a fresh user path — not just code inspection.
+- If you are going in circles, say so. Propose a different approach instead of retrying the same one.
+- When asked "are you sure?", verify with tools before answering. Do not rely on memory.
+
+```txt
+CORRECTION
+Pattern:
+What went wrong:
+Wrong assumption:
+Fix:
+Prevention:
+```
+
+The goal is not to never fail. The goal is to never fail the same way twice.
+
+---
+
+# 14. PERFORMANCE LAW
 
 Check:
 ```txt
@@ -712,7 +773,7 @@ Prefer:
 
 ---
 
-# 14. DATABASE / PERSISTENCE LAW
+# 15. DATABASE / PERSISTENCE LAW
 
 Before changing persistence:
 
@@ -785,7 +846,7 @@ Rules:
 
 ---
 
-# 15. FRONTEND AND DESIGN LAW
+# 16. FRONTEND AND DESIGN LAW
 
 Any frontend work must be clean, professional, mobile-friendly, optimized, user-friendly, and well designed.
 
@@ -910,7 +971,7 @@ Risk:
 
 ---
 
-# 16. API / INTERFACE LAW
+# 17. API / INTERFACE LAW
 
 Every endpoint, CLI command, library function, or UI action has a contract.
 
@@ -935,9 +996,31 @@ Rules:
 
 ---
 
-# 17. TEST / VERIFICATION LAW
+# 18. TEST / VERIFICATION LAW
 
 Always define verification.
+
+## Verifiable goals
+
+Transform vague tasks into concrete verifiable goals before starting:
+
+```txt
+"Add validation"  → write tests for invalid inputs, then make them pass
+"Fix the bug"     → write a test that reproduces it, then make it pass
+"Refactor X"      → ensure tests pass before and after
+"Add feature Y"   → define acceptance criteria, implement, verify each
+```
+
+For multi-step tasks, pair every step with its verification:
+```txt
+1. [Step] → verify: [specific check]
+2. [Step] → verify: [specific check]
+3. [Step] → verify: [specific check]
+```
+
+Strong success criteria let you work independently. Weak criteria ("make it work") require constant clarification. Define the criteria up front.
+
+## Verification protocol
 
 ```txt
 TEST
@@ -959,11 +1042,12 @@ Before final:
 - run targeted tests if possible
 - run lint/type checks if relevant and available
 - inspect diff for unintended changes
+- verify the change from a fresh user perspective, not just code inspection
 - state remaining risk
 
 ---
 
-# 18. OBJECTIVE REVIEW LAW
+# 19. OBJECTIVE REVIEW LAW
 
 Review code like a production incident will happen.
 
@@ -993,10 +1077,22 @@ Do not nitpick style unless it affects maintainability or project conventions.
 
 ---
 
-# 19. CONTEXT COMPRESSION LAW
+# 20. CONTEXT AND MEMORY LAW
 
 Conversation is raw event log.
 Memory is extracted operational state.
+
+## Context management
+
+Agents lose context over long conversations. Compensate deliberately.
+
+- After long conversations or many edits, re-read relevant files before editing — do not trust memory of file contents.
+- For large files (500+ lines), read focused sections instead of relying on a single huge read.
+- If tool output is truncated, re-run a narrower command before acting on partial data.
+- When handing off work or switching focus, write the current state to a persistent note before moving on.
+- Do not paste entire files or large static prompts into every turn — load selectively.
+
+## State compression
 
 Keep:
 
@@ -1031,7 +1127,7 @@ Preserve exact names, errors, commands, files, schemas, payloads, decisions, and
 
 ---
 
-# 20. DOCUMENTATION MAINTENANCE LAW
+# 21. DOCUMENTATION MAINTENANCE LAW
 
 Documentation is part of the project, not an afterthought.
 
@@ -1102,7 +1198,7 @@ Reason:
 
 ---
 
-# 21. AGENT INSTRUCTION FILE RULES
+# 22. AGENT INSTRUCTION FILE RULES
 
 This file is a universal base.
 Project-specific instructions should override it.
@@ -1140,7 +1236,7 @@ Reference deeper docs when needed.
 
 ---
 
-# 22. OUTPUT CONTRACTS
+# 23. OUTPUT CONTRACTS
 
 ## Bug
 
@@ -1251,7 +1347,7 @@ Risk:
 
 ---
 
-# 23. FINAL COMMAND
+# 24. FINAL COMMAND
 
 ```txt
 Be objective.
@@ -1259,12 +1355,16 @@ Verify before claiming — cite proof.
 Read repo instructions first.
 Read existing docs first.
 Map before patch.
+Plan before executing non-trivial work.
+Keep phases bounded — verify between slices.
 Keep MVC responsibilities clear.
 Build from contract.
 Use core code first.
 Use the smallest safe amount of code.
 Delete before adding.
 Use low-risk libraries only when they clearly help.
+Re-read before editing. Re-read after editing.
+Every changed line traces to the request.
 Keep frontend mobile-first, clean, optimized, professional, and user-friendly.
 Design is part of building — the coder is the designer.
 Apply KISS.
@@ -1274,7 +1374,10 @@ Do not modernize or refactor what was not asked.
 Stop and ask before destructive or irreversible changes.
 Patch the correct layer.
 Preserve working code.
+If a fix fails twice, stop and rethink.
+Re-read files after long conversations.
 Update documentation when affected.
+Define verifiable goals before implementing.
 Test or state not tested.
 State risk.
 No hallucinations.

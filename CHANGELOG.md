@@ -1,5 +1,25 @@
 # Changelog
 
+## v9.0 - Planning protocol, edit safety, self-correction, verifiable goals, context management
+
+Integrated battle-tested patterns from agent-md (iamfakeguru/claude-md) and Karpathy-inspired CLAUDE.md (220K+ combined GitHub stars) into AEON's universal framework.
+
+Added:
+
+- **Planning protocol** (§2) — structured plan-before-execute sequence for non-trivial work: Context, Questions, Structure, Steps, Execute
+- **Execution limits** (§2) — bounded phases (~5 files per pass), no mixing refactors with features, scope-growth detection
+- **Edit safety** (§8) — re-read before and after editing, comprehensive search on renames (calls, types, strings, dynamic imports, barrel files, test mocks), never delete without verifying references
+- **Surgical change test** (§8) — every changed line must trace directly to the user's request
+- **Self-Correction Law** (§13, new) — if a fix fails twice, stop and re-read top-down; note correction patterns; test from fresh user perspective; detect and break loops
+- **Verifiable goals** (§18) — transform vague tasks into concrete test-first goals with step+verify pairs
+- **Context management** (§20) — re-read files after long conversations, chunk large files, handle truncated output, selective context loading
+- Updated Final Command with 7 new principles from above additions
+
+Changed:
+
+- §19 Context Compression renamed to §20 Context and Memory Law — now includes context management subsection
+- Sections renumbered 13–24 (added Self-Correction as §13, shifted all subsequent sections)
+
 ## v8.1 - Enforcement, stop gates, hardened security
 
 Added:
